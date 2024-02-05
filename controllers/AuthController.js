@@ -50,6 +50,7 @@ exports.passwordLessLogin = [
                     updatedAt: new Date(),
                     otp: otp,
                     otpExpiry: otpExpiry,
+                    otpTries: 0
                },
                {
                     where: { id: userData.id },
