@@ -14,7 +14,7 @@ const { Op } = require('sequelize');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/images/products') // Destination folder for uploaded files
+    cb(null, path.join(__dirname, "../public/images/products")) // Destination folder for uploaded files
   },
   filename: function (req, file, cb) {
     // Renaming uploaded files to avoid naming conflicts
