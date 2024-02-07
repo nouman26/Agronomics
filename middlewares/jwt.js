@@ -9,7 +9,7 @@ const authenticate = async (req, res, next) => {
 	if (!token) {
 		return res.status(401).json({ status: 401, data: 'No authorization token was found' });
 	}
-   
+	console.log(token)
 	// Verify the token
 	let decoded;
 	try {

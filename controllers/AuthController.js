@@ -103,7 +103,7 @@ exports.verifyOtp = [
           if (parseInt(userData.otp) !== parseInt(otp)){
                await Models.User.update({
                     updatedAt: new Date(),
-                    otpTries: userData.otpTries + 1,
+                    otpTries: userData.otpTries ? parseInt(userData.otpTries) + 1 : 1,
                },
                {
                     where: { id: userData.id },

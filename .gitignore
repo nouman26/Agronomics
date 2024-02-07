@@ -34,8 +34,7 @@ build/Release
 
 # Dependency directories
 node_modules/
-public/avatars/
-public/statesData/
+public/
 jspm_packages/
 
 # TypeScript v1 declaration files
