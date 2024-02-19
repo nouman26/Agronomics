@@ -40,4 +40,29 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
+// =============== Relation Between Products and Product Listing ===============
+db.Product.hasMany(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+db.ListingProduct.belongsTo(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+
+// =============== Relation Between Seed and Product Listing ===============
+db.SeedProducts.hasOne(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+db.ListingProduct.belongsTo(db.SeedProducts, { as: "seedProducts", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+
+// =============== Relation Between Machinary and Product Listing ===============
+db.MachineryProduct.hasOne(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+db.ListingProduct.belongsTo(db.MachineryProduct, { as: "machineryProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+
+// =============== Relation Between Composition and Product ===============
+db.Product.hasMany(db.Composition, { as: "composition", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+db.Composition.belongsTo(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+
+
+// =============== Relation Between User and Product Listing ===============
+db.User.hasMany(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "owner", allowNull: true } })
+db.ListingProduct.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "owner", allowNull: true } })
+
+// =============== Relation Between User and Address ===============
+db.User.hasMany(db.Address, { as: "address", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+db.Address.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+
 module.exports = db;

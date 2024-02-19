@@ -1,8 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
     const Machinery = sequelize.define('MachineryProduct', {
         id:{
-            type: DataTypes.STRING,
-            primaryKey: true
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true
         },
         name: DataTypes.STRING,
         horsePower: DataTypes.FLOAT,

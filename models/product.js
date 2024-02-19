@@ -1,8 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
     const Products = sequelize.define("Product", {
         id:{
-            type: DataTypes.STRING,
-            primaryKey: true
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true
         },
         name: DataTypes.STRING,
         description:  DataTypes.STRING,
@@ -12,8 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         pkgQuantity:  DataTypes.STRING,
         ProductType: DataTypes.STRING,
         category: DataTypes.STRING,
-        formType: DataTypes.STRING,
-        compisitions: DataTypes.JSON
+        formType: DataTypes.STRING
     },{
         underscored: true,
       });

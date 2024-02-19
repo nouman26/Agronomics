@@ -1,5 +1,6 @@
 var jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET;
+const Models = require("../models");
 
 const authenticate = async (req, res, next) => {
 	// Get token from the header
@@ -9,7 +10,7 @@ const authenticate = async (req, res, next) => {
 	if (!token) {
 		return res.status(401).json({ status: 401, data: 'No authorization token was found' });
 	}
-	console.log(token)
+
 	// Verify the token
 	let decoded;
 	try {
@@ -28,8 +29,17 @@ const authenticate = async (req, res, next) => {
 	}
    
 	if (decoded) {
-		req.user = decoded;
-	  	return next();
+		let user = await Models.User.findOne({
+			where: { id: decoded.id}
+	   	});
+
+	   	if (!user) {
+			return res.status(401).json({ status: 401, data: 'Unauthorized Access' });
+		}
+		else{
+			req.user = decoded;
+			return next();
+		}
 	} else {
 	  	return res.status(401).json({ status: 401, data: 'You are not allowed' });
 	}

@@ -1,7 +1,6 @@
 const Models = require("../models");
 const apiResponse = require("../helpers/apiResponse");
 const validatePhone = require("../helpers/validatePhone");
-const generateId = require("../helpers/generateId");
 const randomNumber = require("../helpers/randomNumber");
 const moment = require("moment");
 const sendEmail = require("../helpers/sendEmail");
@@ -38,16 +37,12 @@ exports.passwordLessLogin = [
                     email: email,
                     phone: phone,
                     type: type,
-                    id: await generateId(),
                     otp: otp,
-                    otpExpiry: otpExpiry,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
+                    otpExpiry: otpExpiry
                });
           }
           else {
                await Models.User.update({
-                    updatedAt: new Date(),
                     otp: otp,
                     otpExpiry: otpExpiry,
                     otpTries: 0
@@ -93,6 +88,8 @@ exports.verifyOtp = [
      async (req, res) => {
      try{
           const { otp, id } = req.body;
+          console.log(parseInt(id))
+          if (isNaN(parseInt(id))) return apiResponse.validationErrorWithData(res, "Please provide valid id");
           if (!otp) return apiResponse.validationErrorWithData(res, "Please provide otp");
           if (!id) return apiResponse.validationErrorWithData(res, "Please provide id");
           let userData = await Models.User.findOne({
@@ -171,6 +168,7 @@ exports.profileUpdate = [
           if (lastName) update.lastName = lastName;
           if (phone) update.phone = phone;
           if (email) update.email = email;
+
           if (location){
                const {address, city, province, pincode, country, latitude, longitude } = req.body.location;
                if (!address) return apiResponse.validationErrorWithData(res, "Please provide address");
@@ -180,8 +178,17 @@ exports.profileUpdate = [
                if (!country) return apiResponse.validationErrorWithData(res, "Please provide country");
                if (!latitude) return apiResponse.validationErrorWithData(res, "Please provide latitude");
                if (!longitude) return apiResponse.validationErrorWithData(res, "Please provide longitude");
-
-               update.address = req.body.location;
+              
+               await Models.Address.create({
+                    userId: req.user.id,
+                    address,
+                    city,
+                    province,
+                    pincode,
+                    country,
+                    latitude,
+                    longitude
+               });
           }
 
           await Models.User.update({
@@ -194,6 +201,11 @@ exports.profileUpdate = [
 
           userData = await Models.User.findOne({
                where: { id: req.user.id},
+               include: {
+                    model: Models.Address,
+                    as: "address"
+               },
+               attributes: { exclude: ['otp','otpTries','otpExpiry'] }
           });
 
           return apiResponse.successResponseWithData(res, "Profile updated successfully", userData);
@@ -210,6 +222,11 @@ exports.profile = [
      try{
           let userData = await Models.User.findOne({
                where: { id: req.user.id},
+               include: {
+                    model: Models.Address,
+                    as: "address"
+               },
+               attributes: { exclude: ['otp','otpTries','otpExpiry'] }
           });
           return apiResponse.successResponseWithData(res, "Profile fetched successfully", userData);
      }
@@ -231,37 +248,37 @@ exports.updateAddress = [
           if (!country) return apiResponse.validationErrorWithData(res, "Please provide country");
           if (!latitude) return apiResponse.validationErrorWithData(res, "Please provide latitude");
           if (!longitude) return apiResponse.validationErrorWithData(res, "Please provide longitude");
-          
-          let location = {
-               address: address,
-               city: city,
-               province: province,
-               pincode: pincode,
-               country: country,
-               latitude: latitude,
-               longitude: longitude
-          }
-
 
           if(id){
                let data = await Models.Address.findOne({
                     where: { id: id},
                });
-               if (!userData) return apiResponse.validationErrorWithData(res, "Address not found");
+               if (!data) return apiResponse.validationErrorWithData(res, "Address not found");
               
                data = await Models.Address.update({
-                    updatedAt: new Date(),
-                    location: location
+                    address: address,
+                    city: city,
+                    province: province,
+                    pincode: pincode,
+                    country: country,
+                    latitude: latitude,
+                    longitude: longitude
                },
                {
                     where: { id: id },
                });
-               return apiResponse.successResponseWithData(res, "Address updated successfully", userData);
+               return apiResponse.successResponseWithData(res, "Address updated successfully", data);
           }
           else{
                let data = await Models.Address.create({
                     userId: req.user.id,
-                    location: location
+                    address: address,
+                    city: city,
+                    province: province,
+                    pincode: pincode,
+                    country: country,
+                    latitude: latitude,
+                    longitude: longitude
                });
                return apiResponse.successResponseWithData(res, "Address added successfully", data);
           }
@@ -284,7 +301,7 @@ exports.deleteAddress = [
                     where: { id: id},
                });
                if (!data) return apiResponse.validationErrorWithData(res, "Address not found");
-               data = await Models.Address.destroy({
+               await Models.Address.destroy({
                     where: { id: id },
                });
                return apiResponse.successResponse(res, "Address deleted successfully");
