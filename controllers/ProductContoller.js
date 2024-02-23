@@ -116,9 +116,13 @@ exports.addProduct = [
                     }
                 }
                 else{
-                    product = await Models.User.findOne({
+                    product = await Models.Product.findOne({
                         where: { id: req.body.productId},
                    });
+                }
+
+                if(!product){
+                  return apiResponse.successResponse(res, "Main Product not found")
                 }
 
                 await Models.ListingProduct.create({
@@ -206,12 +210,31 @@ exports.getMyProduct = [
   auth,
     async (req, res) => {
     try{
-      const { limit = 20, skip = 0 } = req.query;
+      // const { limit = 20, skip = 0 } = req.query;
 
       const listingProducts = await Models.ListingProduct.findAll({
         where:{owner:req.user.id},
-        limit: parseInt(limit),
-        offset: parseInt(skip),
+        // limit: parseInt(limit),
+        // offset: parseInt(skip),
+        order: [['createdAt', 'DESC']]
+      });
+
+      return apiResponse.successResponseWithData(res, "data", listingProducts)
+    }catch(err){
+      console.log(err)
+      return apiResponse.ErrorResponse(res, "Something went wrong")
+    }
+}]
+
+exports.getUserProduct = [
+    async (req, res) => {
+    try{
+      // const { limit = 20, skip = 0 } = req.query;
+
+      const listingProducts = await Models.ListingProduct.findAll({
+        where:{owner:req.params.id},
+        // limit: parseInt(limit),
+        // offset: parseInt(skip),
         order: [['createdAt', 'DESC']]
       });
 
@@ -257,7 +280,12 @@ exports.getProducDetails = [
             return apiResponse.ErrorResponse(res, "Product not found")
           }
 
-          let final = {...listing.dataValues, ...product.dataValues, composition};
+          let mainPro = {...product.dataValues};
+          delete mainPro.id;
+
+          let final = {...listing.dataValues, ...mainPro, composition};
+          delete final.productId;
+          delete final.owner;
           return apiResponse.successResponseWithData(res, "Product Details", final);
         }
         else{
@@ -288,6 +316,242 @@ exports.search = [
       return apiResponse.successResponseWithData(res, "Search Result", products)
   } catch (err) {
     console.error(err);
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
+}]
+
+exports.buyProduct = [
+  auth,
+  async (req, res) => {
+  try {
+    let {productId} = req.body;
+
+    if(!productId){
+      return apiResponse.ErrorResponse(res,"Product Id is missing");
+    }
+
+    let pro = await Models.ListingProduct.findOne({
+      where: {id: productId}
+    });
+
+    if(!pro){
+        return apiResponse.ErrorResponse(res,"Product not found");
+    }
+    else if(pro.owner == req.user.id){
+      return apiResponse.ErrorResponse(res,"You can not buy your own product");
+    }
+    else{
+      let buy = await Models.ProductBuy.findOne({
+        where: {id: productId}
+      });
+
+      if(buy){
+        return apiResponse.ErrorResponse(res,"You have already buyed this Product");
+      }
+      else{
+        await Models.ProductBuy.create({
+          listingId: pro.id,
+          userId: req.user.id
+        });
+        return apiResponse.successResponse(res,"Product purchased sucessfully");
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
+}]
+
+exports.biddingProduct = [
+  auth,
+  async (req, res) => {
+  try {
+    let {productId, price} = req.body;
+
+    if(!price || !productId){
+      return apiResponse.ErrorResponse(res,"Product Id or Price is missing");
+    }
+
+    let pro = await Models.ListingProduct.findOne({
+      where: {id: productId}
+    });
+
+    if(!pro){
+        return apiResponse.ErrorResponse(res,"Product not found");
+    }
+    else if(pro.owner == req.user.id){
+      return apiResponse.ErrorResponse(res,"You can not bid on your own product");
+    }
+    else if(!pro.bidding){
+        return apiResponse.ErrorResponse(res,"Product has no bidding option");
+    }
+    else{
+      let buy = await Models.ProductBidding.findOne({
+        where: {id: productId}
+      });
+
+      if(buy){
+        return apiResponse.ErrorResponse(res,"You have already bidding on this product");
+      }
+      else{
+        await Models.ProductBidding.create({
+          listingId: pro.id,
+          price,
+          userId: req.user.id
+        });
+        return apiResponse.successResponse(res,"Bidding on this product sucessfully");
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
+}]
+
+exports.ProductBuyers = [
+  auth,
+  async (req, res) => {
+  try{
+      let listing = await Models.ListingProduct.findOne({
+        where: {id:req.body.productId},
+        include: {
+          model: Models.ProductBuy,
+          as: "buyers", // Use the default alias assigned by Sequelize
+          include: {
+            model: Models.User,
+            as: "user", // Use the default alias assigned by Sequelize
+            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] },
+          }
+        }
+      });
+      if(listing){
+        let product;
+        if(listing.productType == "Seed"){
+          product = await listing.getSeedProducts();
+        }
+        else if(listing.productType == "Machinary"){
+          product = await listing.getMachineryProduct();
+        }
+        else{
+          product = await listing.getProduct();
+        }
+
+        let composition = await product.getComposition({
+          attributes:["name","value"]
+        });
+
+        if(!product){
+          return apiResponse.ErrorResponse(res, "Product not found")
+        }
+
+        let mainPro = {...product.dataValues};
+        delete mainPro.id;
+
+        let final = {...listing.dataValues, ...mainPro, composition};
+        delete final.productId;
+        delete final.owner;
+        return apiResponse.successResponseWithData(res, "Product Details", final);
+      }
+      else{
+          return apiResponse.ErrorResponse(res, "Product not found")
+      }
+  }catch(err){
+    console.log(err)
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
+}]
+
+exports.ProductBidders = [
+  auth,
+  async (req, res) => {
+  try{
+      let listing = await Models.ListingProduct.findOne({
+        where: {id:req.body.productId},
+        include: {
+          model: Models.ProductBidding,
+          as: "bidders", // Use the default alias assigned by Sequelize
+          include: {
+            model: Models.User,
+            as: "user", // Use the default alias assigned by Sequelize
+            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] },
+          }
+        }
+      });
+      if(listing){
+        let product;
+        if(listing.productType == "Seed"){
+          product = await listing.getSeedProducts();
+        }
+        else if(listing.productType == "Machinary"){
+          product = await listing.getMachineryProduct();
+        }
+        else{
+          product = await listing.getProduct();
+        }
+
+        let composition = await product.getComposition({
+          attributes:["name","value"]
+        });
+
+        if(!product){
+          return apiResponse.ErrorResponse(res, "Product not found")
+        }
+
+        let mainPro = {...product.dataValues};
+        delete mainPro.id;
+
+        let final = {...listing.dataValues, ...mainPro, composition};
+        delete final.productId;
+        delete final.owner;
+        return apiResponse.successResponseWithData(res, "Product Details", final);
+      }
+      else{
+          return apiResponse.ErrorResponse(res, "Product not found")
+      }
+  }catch(err){
+    console.log(err)
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
+}]
+
+exports.AnalyticProduct = [
+  auth,
+  async (req, res) => {
+  try{
+      let totalProducts = await Models.ListingProduct.findAll({
+        where: {owner: req.user.id},
+        attributes:["id"]
+      });
+
+      let ids = [];
+
+      totalProducts.forEach(x => ids.push(x.id));
+
+      console.log(ids)
+      let totalBids = await Models.ProductBidding.count({
+        where: {
+          listingId:{
+            [Op.in]: ids
+          }
+        }
+      })
+
+      let totalBuys = await Models.ProductBuy.count({
+        where: {
+          listingId:{
+            [Op.in]: ids
+          }
+        }
+      })
+
+      return apiResponse.successResponseWithData(res, "Analytics",{
+        totalProducts: totalProducts.length,
+        totalBids,
+        totalBuys
+      })
+
+  }catch(err){
+    console.log(err)
     return apiResponse.ErrorResponse(res, "Something went wrong")
   }
 }]

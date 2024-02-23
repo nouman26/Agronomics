@@ -6,7 +6,29 @@ const moment = require("moment");
 const sendEmail = require("../helpers/sendEmail");
 const sendMessage = require("../helpers/sendMessage");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 let auth = require("../middlewares/jwt");
+
+const storage = multer.diskStorage({
+     destination: (req, file, cb) => {
+         cb(null, "./public/avatars");
+     },
+     filename: (req, file, cb) => {
+         console.log(file);
+         cb(null, Date.now() + file.originalname);
+     }
+ });
+ 
+ 
+ const fileFilter = (req, file, cb) => {
+     if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/heif" || file.mimetype == "image/heic") {
+         cb(null, true);
+     } else {
+         cb(null, false);
+     }
+ };
+ 
+ const upload = multer({storage: storage, fileFilter: fileFilter}).single("avatar");
 
 exports.passwordLessLogin = [
      async (req, res) => {
@@ -328,3 +350,47 @@ exports.address = [
           }
      }
 ]
+
+exports.allUser = [
+     async (req, res) => {
+     try{
+          let userData = await Models.User.findAll({
+               where: {},
+               attributes: { exclude: ['otp','otpTries','otpExpiry'] }
+          });
+          return apiResponse.successResponseWithData(res, "Users fetched successfully", userData);
+     }
+     catch(err){
+          console.log(err);
+          return apiResponse.ErrorResponse(res, "Something went wrong");
+     }
+}];
+
+exports.changeAvatar = [
+     auth,
+     function (req, res) {
+          try {
+               upload(req, res, async (err) => {
+                    if (err) {
+                         return apiResponse.ErrorResponse(res, err.message);
+                    }
+     
+                    if (!req.file) {
+                         return apiResponse.ErrorResponse(res, "Image format not supported");
+                    } else {
+                         await Models.User.update({
+                              avatar: "/avatar/"+req.file.filename
+                         },
+                         {
+                              where: { id: req.user.id },
+                         });
+                         return apiResponse.successResponseWithData(res,"Avatar Updated Sucessfully",  "/avatar/"+req.file.filename)
+                 }
+             });
+ 
+         } catch (err) {
+             //throw error in json response with status 500.
+             return apiResponse.ErrorResponse(res, err.message);
+         }
+     }
+ ];

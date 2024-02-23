@@ -56,7 +56,6 @@ db.ListingProduct.belongsTo(db.MachineryProduct, { as: "machineryProduct", onDel
 db.Product.hasMany(db.Composition, { as: "composition", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
 db.Composition.belongsTo(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
 
-
 // =============== Relation Between User and Product Listing ===============
 db.User.hasMany(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "owner", allowNull: true } })
 db.ListingProduct.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "owner", allowNull: true } })
@@ -64,5 +63,21 @@ db.ListingProduct.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate
 // =============== Relation Between User and Address ===============
 db.User.hasMany(db.Address, { as: "address", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
 db.Address.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+
+// =============== Relation Between Product and Bidding ===============
+db.ListingProduct.hasMany(db.ProductBidding, { as: "bidders", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+db.ProductBidding.belongsTo(db.ListingProduct, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+
+// =============== Relation Between Product and Product Sell ===============
+db.ListingProduct.hasMany(db.ProductBuy, { as: "buyers", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+db.ProductBuy.belongsTo(db.ListingProduct, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+
+// =============== Relation Between User and Product Sell ===============
+db.User.hasMany(db.ProductBuy, { as: "productbuy", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+db.ProductBuy.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+
+// =============== Relation Between User and Product Bidding ===============
+db.User.hasMany(db.ProductBidding, { as: "bidding", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+db.ProductBidding.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
 
 module.exports = db;
