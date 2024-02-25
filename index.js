@@ -7,6 +7,7 @@ var apiRouter = require("./routes/api");
 var cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./connection/db");
+var apiResponse = require("./helpers/apiResponse")
 
 // DB connection
 connectDB();
@@ -34,7 +35,7 @@ app.use("/api/", apiRouter);
 
 // throw 404 if URL not found
 app.all("*", function(req, res) {
-	// return apiResponse.notFoundResponse(res, "Page not found");
+	return apiResponse.notFoundResponse(res, "Page not found");
 });
 
 // app.use((err, req, res) => {

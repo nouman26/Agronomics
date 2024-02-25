@@ -191,11 +191,11 @@ exports.getProductLisingsWRTType = [
 exports.getProductLisings = [
     async (req, res) => {
     try{
-      const { limit = 20, skip = 0 } = req.query;
+      // const { limit = 20, skip = 0 } = req.query;
 
       const listingProducts = await Models.ListingProduct.findAll({
-        limit: parseInt(limit),
-        offset: parseInt(skip),
+        // limit: parseInt(limit),
+        // offset: parseInt(skip),
         order: [['createdAt', 'DESC']]
       });
 
@@ -412,49 +412,21 @@ exports.ProductBuyers = [
   auth,
   async (req, res) => {
   try{
-      let listing = await Models.ListingProduct.findOne({
-        where: {id:req.body.productId},
+    let listing = await Models.ListingProduct.findAll({
+      where: { owner: req.user.id },
+      include: [{
+        model: Models.ProductBuy,
+        as: "buyers", // Use the default alias assigned by Sequelize
         include: {
-          model: Models.ProductBuy,
-          as: "buyers", // Use the default alias assigned by Sequelize
-          include: {
-            model: Models.User,
-            as: "user", // Use the default alias assigned by Sequelize
-            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] },
-          }
-        }
-      });
-      if(listing){
-        let product;
-        if(listing.productType == "Seed"){
-          product = await listing.getSeedProducts();
-        }
-        else if(listing.productType == "Machinary"){
-          product = await listing.getMachineryProduct();
-        }
-        else{
-          product = await listing.getProduct();
-        }
-
-        let composition = await product.getComposition({
-          attributes:["name","value"]
-        });
-
-        if(!product){
-          return apiResponse.ErrorResponse(res, "Product not found")
-        }
-
-        let mainPro = {...product.dataValues};
-        delete mainPro.id;
-
-        let final = {...listing.dataValues, ...mainPro, composition};
-        delete final.productId;
-        delete final.owner;
-        return apiResponse.successResponseWithData(res, "Product Details", final);
-      }
-      else{
-          return apiResponse.ErrorResponse(res, "Product not found")
-      }
+          model: Models.User,
+          as: "user", // Use the default alias assigned by Sequelize
+          attributes: { exclude: ['otp', 'otpTries', 'otpExpiry', 'status'] },
+        },
+        required: true // This ensures that only listings with bidders are returned
+      }]
+    });
+        
+      return apiResponse.successResponseWithData(res, "Product Buyyers", listing);
   }catch(err){
     console.log(err)
     return apiResponse.ErrorResponse(res, "Something went wrong")
@@ -465,49 +437,21 @@ exports.ProductBidders = [
   auth,
   async (req, res) => {
   try{
-      let listing = await Models.ListingProduct.findOne({
-        where: {id:req.body.productId},
-        include: {
+      let listing = await Models.ListingProduct.findAll({
+        where: {owner:req.user.id},
+        include: [{
           model: Models.ProductBidding,
           as: "bidders", // Use the default alias assigned by Sequelize
           include: {
             model: Models.User,
             as: "user", // Use the default alias assigned by Sequelize
             attributes: { exclude: ['otp','otpTries','otpExpiry','status'] },
-          }
-        }
+          },
+          required: true // This ensures that only listings with bidders are returned
+        }]
       });
-      if(listing){
-        let product;
-        if(listing.productType == "Seed"){
-          product = await listing.getSeedProducts();
-        }
-        else if(listing.productType == "Machinary"){
-          product = await listing.getMachineryProduct();
-        }
-        else{
-          product = await listing.getProduct();
-        }
-
-        let composition = await product.getComposition({
-          attributes:["name","value"]
-        });
-
-        if(!product){
-          return apiResponse.ErrorResponse(res, "Product not found")
-        }
-
-        let mainPro = {...product.dataValues};
-        delete mainPro.id;
-
-        let final = {...listing.dataValues, ...mainPro, composition};
-        delete final.productId;
-        delete final.owner;
-        return apiResponse.successResponseWithData(res, "Product Details", final);
-      }
-      else{
-          return apiResponse.ErrorResponse(res, "Product not found")
-      }
+      
+      return apiResponse.successResponseWithData(res, "Product Bidders", listing);
   }catch(err){
     console.log(err)
     return apiResponse.ErrorResponse(res, "Something went wrong")

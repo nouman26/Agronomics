@@ -382,12 +382,12 @@ exports.changeAvatar = [
                          return apiResponse.ErrorResponse(res, "Image format not supported");
                     } else {
                          await Models.User.update({
-                              avatar: "/avatar/"+req.file.filename
+                              avatar: "/avatars/"+req.file.filename
                          },
                          {
                               where: { id: req.user.id },
                          });
-                         return apiResponse.successResponseWithData(res,"Avatar Updated Sucessfully",  "/avatar/"+req.file.filename)
+                         return apiResponse.successResponseWithData(res,"Avatar Updated Sucessfully",  "/avatars/"+req.file.filename)
                  }
              });
  
