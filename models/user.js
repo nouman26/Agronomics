@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     otp: DataTypes.INTEGER,
     otpExpiry: DataTypes.DATE,
     otpTries: {type: DataTypes.INTEGER,  defaultValue: 0},
+    description: {type: DataTypes.STRING}
   },{
     underscored: true,
   });

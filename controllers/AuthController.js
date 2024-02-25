@@ -176,10 +176,10 @@ exports.profileUpdate = [
      auth,
      async (req, res) => {
      try{
-          const { firstName, lastName, location, phone, email } = req.body;
-          if (!firstName) return apiResponse.validationErrorWithData(res, "Please provide first name");
-          if (!lastName) return apiResponse.validationErrorWithData(res, "Please provide last name");
-          if (!location) return apiResponse.validationErrorWithData(res, "Please provide address");
+          const { firstName, lastName, location, phone, email, description} = req.body;
+          // if (!firstName) return apiResponse.validationErrorWithData(res, "Please provide first name");
+          // if (!lastName) return apiResponse.validationErrorWithData(res, "Please provide last name");
+          // if (!location) return apiResponse.validationErrorWithData(res, "Please provide address");
           
           let userData = await Models.User.findOne({
                where: { id: req.user.id},
@@ -190,6 +190,7 @@ exports.profileUpdate = [
           if (lastName) update.lastName = lastName;
           if (phone) update.phone = phone;
           if (email) update.email = email;
+          if (description) update.description = description;
 
           if (location){
                const {address, city, province, pincode, country, latitude, longitude } = req.body.location;
@@ -213,6 +214,8 @@ exports.profileUpdate = [
                });
           }
 
+          if(Object.keys(update).length < 1) return apiResponse.ErrorResponse(res, "Atleast one field is required to update profile");
+          
           await Models.User.update({
                updatedAt: new Date(),
                ...update
