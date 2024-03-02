@@ -3,11 +3,10 @@ const apiResponse = require("../helpers/apiResponse");
 const validatePhone = require("../helpers/validatePhone");
 const randomNumber = require("../helpers/randomNumber");
 const moment = require("moment");
-const sendEmail = require("../helpers/sendEmail");
 const sendMessage = require("../helpers/sendMessage");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-let auth = require("../middlewares/jwt");
+let SellerAuh = require("../middlewares/sellerAuth");
 
 const storage = multer.diskStorage({
      destination: (req, file, cb) => {
@@ -19,7 +18,6 @@ const storage = multer.diskStorage({
      }
  });
  
- 
  const fileFilter = (req, file, cb) => {
      if (file.mimetype == "image/jpeg" || file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/heif" || file.mimetype == "image/heic") {
          cb(null, true);
@@ -28,77 +26,125 @@ const storage = multer.diskStorage({
      }
  };
  
- const upload = multer({storage: storage, fileFilter: fileFilter}).single("avatar");
+const upload = multer({storage: storage, fileFilter: fileFilter}).single("avatar");
 
 exports.passwordLessLogin = [
      async (req, res) => {
      try{
-          const { email, phone, type} = req.body;
-          if (!email && !phone)
+          const {phone, type} = req.body;
+          if (!phone)
           return apiResponse.validationErrorWithData(res, "Please provide email or phone");
      
           let userData = {};
           const otpExpiry = moment().add(10, "minutes").valueOf();
           let otp = await randomNumber(4);
-          if (email) {
-               userData = await Models.User.findOne({
-                    where: { email: email, type: type},
-               });
+          
+          let validatePhoneError = validatePhone(phone);
+          console.log(validatePhoneError);
+          if (validatePhoneError) return apiResponse.validationErrorWithData(res, validatePhoneError);
+          userData = await Models.User.findOne({
+               where: { phone: phone },
+          });
+          let isBuyer = false;
+          let isSeller = false;
+
+          if(type == "seller"){
+               isSeller = true;
           }
-          else if (phone) {
-               let validatePhoneError = validatePhone(phone);
-               console.log(validatePhoneError);
-               if (validatePhoneError) return apiResponse.validationErrorWithData(res, validatePhoneError);
-               userData = await Models.User.findOne({
-                    where: { phone: phone },
-               });
+
+          if(type == "buyer"){
+               isBuyer = true;
           }
           
           if (!userData) {
                userData = await Models.User.create({
-                    email: email,
                     phone: phone,
-                    type: type,
                     otp: otp,
-                    otpExpiry: otpExpiry
+                    role: type,
+                    otpExpiry: otpExpiry,
+                    isBuyer,
+                    isSeller
                });
           }
           else {
+               if(userData.isSeller){
+                    isSeller = true;
+               }
+               if(userData.isBuyer){
+                    isBuyer = true;
+               }
                await Models.User.update({
                     otp: otp,
                     otpExpiry: otpExpiry,
-                    otpTries: 0
+                    otpTries: 0,
+                    role: type,
+                    isBuyer,
+                    isSeller
                },
                {
                     where: { id: userData.id },
                });
           }
           
-          // send otp to email or phone
-          if (email) {
-               // send otp to email
-               let replacements = {
-                    otp: otp,
-               };
-               await sendEmail("otp", replacements, email, "OTP");
-               return apiResponse.successResponseWithData(res, "OTP sent successfully to your email",{
+          // send otp to phone
+          let { status, data} = await sendMessage(phone, `Your OTP for Agronomics is ${otp}. For any issue contact us 03217336243.`);
+          if (status === 200 && data) {
+               sendSuccess = true;
+               return apiResponse.successResponseWithData(res, "OTP sent successfully to your phone",{
                     id: userData.id,
-                    email: userData.email,
+                    phone: userData.phone
                });
           }
-          else if (phone) {
-               let { status, data} = await sendMessage(phone, `Your OTP for Agronomics is ${otp}. For any issue contact us 03217336243.`);
-               if (status === 200 && data) {
-                    sendSuccess = true;
-                    return apiResponse.successResponseWithData(res, "OTP sent successfully to your phone",{
-                         id: userData.id,
-                         phone: userData.phone
-                    });
-               }
-               else {
-                    return apiResponse.ErrorResponse(res, "Something went wrong");
-               }
+          else {
+               return apiResponse.ErrorResponse(res, "Something went wrong");
           }
+          
+     }
+     catch(err){
+          console.log(err);
+          return apiResponse.ErrorResponse(res, "Something went wrong");
+     }
+}];
+
+exports.switchRole = [
+     async (req, res) => {
+     try{
+          let userData = await Models.User.findOne({
+               where: { id: req.user.id},
+          });
+
+          if (!userData) return apiResponse.validationErrorWithData(res, "User not found");
+          await Models.User.update({
+               role: req.user.role == "seller" ? "buyer" : "seller",
+               isBuyer:true,
+               isSeller:true
+          },
+          {
+               where: { id: userData.id },
+          });
+
+          let tokenData = {
+               id: userData.id,
+               role: req.user.role == "seller" ? "buyer" : "seller"
+          };
+          
+          const jwtPayload = tokenData;
+          const jwtData = {
+              expiresIn: process.env.JWT_TIMEOUT_DURATION,
+          };
+          const secret = process.env.JWT_SECRET;
+          //Generated JWT token with Payload and secret.
+          Object.assign(userData, {token: jwt.sign(jwtPayload, secret, jwtData)});
+          let userJson = {
+               id: userData.id,
+               name: userData.name,
+               phone: userData.phone,
+               token: userData.token,
+               isBuyer: true,
+               isSeller: true,
+               role: req.user.role == "seller" ? "buyer" : "seller"
+          };
+          return apiResponse.successResponseWithData(res, "Roll Switched Sucessfully", userJson);
      }
      catch(err){
           console.log(err);
@@ -110,7 +156,7 @@ exports.verifyOtp = [
      async (req, res) => {
      try{
           const { otp, id } = req.body;
-          console.log(parseInt(id))
+
           if (isNaN(parseInt(id))) return apiResponse.validationErrorWithData(res, "Please provide valid id");
           if (!otp) return apiResponse.validationErrorWithData(res, "Please provide otp");
           if (!id) return apiResponse.validationErrorWithData(res, "Please provide id");
@@ -143,11 +189,8 @@ exports.verifyOtp = [
 
           let tokenData = {
                id: userData.id,
-               firstName: userData.firstName,
-               lastName: userData.lastName,
-               email: userData.email,
-               phone: userData.phone,
-           };
+               role: userData.role
+          };
           
           const jwtPayload = tokenData;
           const jwtData = {
@@ -158,11 +201,12 @@ exports.verifyOtp = [
           Object.assign(userData, {token: jwt.sign(jwtPayload, secret, jwtData)});
           let userJson = {
                id: userData.id,
-               firstName: userData.firstName,
-               lastName: userData.lastName,
-               email: userData.email,
+               name: userData.name,
                phone: userData.phone,
-               token: userData.token
+               token: userData.token,
+               isBuyer: userData.isBuyer,
+               isSeller: userData.isSeller,
+               role: userData.role
           };
           return apiResponse.successResponseWithData(res, "OTP verified and login successfully", userJson);
      }
@@ -173,44 +217,34 @@ exports.verifyOtp = [
 }];
 
 exports.profileUpdate = [
-     auth,
+     SellerAuh,
      async (req, res) => {
      try{
-          const { firstName, lastName, location, phone, email, description} = req.body;
-          // if (!firstName) return apiResponse.validationErrorWithData(res, "Please provide first name");
-          // if (!lastName) return apiResponse.validationErrorWithData(res, "Please provide last name");
-          // if (!location) return apiResponse.validationErrorWithData(res, "Please provide address");
-          
+          const { name, phone, email, description, location} = req.body;
+
           let userData = await Models.User.findOne({
                where: { id: req.user.id},
           });
           
           let update = {};
-          if (firstName) update.firstName = firstName;
-          if (lastName) update.lastName = lastName;
+          if (name) update.name = name;
           if (phone) update.phone = phone;
           if (email) update.email = email;
           if (description) update.description = description;
 
           if (location){
-               const {address, city, province, pincode, country, latitude, longitude } = req.body.location;
+               const {address, city, tehsil, district} = req.body.location;
                if (!address) return apiResponse.validationErrorWithData(res, "Please provide address");
                if (!city) return apiResponse.validationErrorWithData(res, "Please provide city");
-               if (!province) return apiResponse.validationErrorWithData(res, "Please provide province");
-               if (!pincode) return apiResponse.validationErrorWithData(res, "Please provide pincode");
-               if (!country) return apiResponse.validationErrorWithData(res, "Please provide country");
-               if (!latitude) return apiResponse.validationErrorWithData(res, "Please provide latitude");
-               if (!longitude) return apiResponse.validationErrorWithData(res, "Please provide longitude");
+               if (!tehsil) return apiResponse.validationErrorWithData(res, "Please provide tehsil");
+               if (!district) return apiResponse.validationErrorWithData(res, "Please provide district");
               
                await Models.Address.create({
                     userId: req.user.id,
                     address,
-                    city,
-                    province,
-                    pincode,
-                    country,
-                    latitude,
-                    longitude
+                    city: city,
+                    tehsil: tehsil,
+                    district: district
                });
           }
 
@@ -242,7 +276,7 @@ exports.profileUpdate = [
 }];
 
 exports.profile = [
-     auth,
+     SellerAuh,
      async (req, res) => {
      try{
           let userData = await Models.User.findOne({
@@ -262,17 +296,14 @@ exports.profile = [
 }];
 
 exports.updateAddress = [
-     auth,
+     SellerAuh,
      async (req, res) => {
      try{
-          const { id, address, city, province, pincode, country, latitude, longitude } = req.body;
+          const { id, address, district, tehsil, city } = req.body;
           if (!address) return apiResponse.validationErrorWithData(res, "Please provide address");
           if (!city) return apiResponse.validationErrorWithData(res, "Please provide city");
-          if (!province) return apiResponse.validationErrorWithData(res, "Please provide province");
-          if (!pincode) return apiResponse.validationErrorWithData(res, "Please provide pincode");
-          if (!country) return apiResponse.validationErrorWithData(res, "Please provide country");
-          if (!latitude) return apiResponse.validationErrorWithData(res, "Please provide latitude");
-          if (!longitude) return apiResponse.validationErrorWithData(res, "Please provide longitude");
+          if (!tehsil) return apiResponse.validationErrorWithData(res, "Please provide tehsil");
+          if (!district) return apiResponse.validationErrorWithData(res, "Please provide district");
 
           if(id){
                let data = await Models.Address.findOne({
@@ -283,11 +314,8 @@ exports.updateAddress = [
                data = await Models.Address.update({
                     address: address,
                     city: city,
-                    province: province,
-                    pincode: pincode,
-                    country: country,
-                    latitude: latitude,
-                    longitude: longitude
+                    tehsil: tehsil,
+                    district: district
                },
                {
                     where: { id: id },
@@ -299,11 +327,8 @@ exports.updateAddress = [
                     userId: req.user.id,
                     address: address,
                     city: city,
-                    province: province,
-                    pincode: pincode,
-                    country: country,
-                    latitude: latitude,
-                    longitude: longitude
+                    tehsil: tehsil,
+                    district: district
                });
                return apiResponse.successResponseWithData(res, "Address added successfully", data);
           }
@@ -316,7 +341,7 @@ exports.updateAddress = [
 ]
 
 exports.deleteAddress = [
-     auth,
+     SellerAuh,
      async function(req, res) {
           try{
                let { id } = req.body;
@@ -339,7 +364,7 @@ exports.deleteAddress = [
 ]
 
 exports.address = [
-     auth,
+     SellerAuh,
      async function(req, res) {
           try{
                let data = await Models.Address.findAll({
@@ -370,7 +395,7 @@ exports.allUser = [
 }];
 
 exports.changeAvatar = [
-     auth,
+     SellerAuh,
      function (req, res) {
           try {
                upload(req, res, async (err) => {

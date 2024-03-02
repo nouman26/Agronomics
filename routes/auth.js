@@ -11,5 +11,6 @@ router.post("/delete/address", Controller.AuthController.deleteAddress);
 router.get("/address", Controller.AuthController.address);
 router.get("/all/user", Controller.AuthController.allUser);
 router.post("/change/avatar", Controller.AuthController.changeAvatar);
+router.get("/switch/role", Controller.AuthController.switchRole);
 
 module.exports = router;

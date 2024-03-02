@@ -1,6 +1,7 @@
 const Models = require("../models");
 const apiResponse = require("../helpers/apiResponse");
-let auth = require("../middlewares/jwt");
+let SellerAuh = require("../middlewares/sellerAuth");
+let BuyerAuh = require("../middlewares/buyersAuth");
 const multer = require('multer');
 const path = require('path');
 const { Op } = require('sequelize');
@@ -30,7 +31,7 @@ const upload = multer({
 }).array('images', 4);
 
 exports.addProduct = [
-    auth,
+    SellerAuh,
     async (req, res) => {
     try{
         upload(req, res, async function (err) {
@@ -139,6 +140,7 @@ exports.addProduct = [
                     ProductType:  req.body.ProductType,
                     image: images,
                     owner: req.user.id,
+                    addressId: req.body.addressId
                 })
 
                 return apiResponse.successResponse(res,"Product Stored Sucessfully")
@@ -207,7 +209,7 @@ exports.getProductLisings = [
 }]
 
 exports.getMyProduct = [
-  auth,
+  SellerAuh,
     async (req, res) => {
     try{
       // const { limit = 20, skip = 0 } = req.query;
@@ -298,7 +300,6 @@ exports.getProducDetails = [
 }]
 
 exports.search = [
-    auth,
     async (req, res) => {
     try {
       let filter =  {
@@ -320,8 +321,8 @@ exports.search = [
   }
 }]
 
-exports.buyProduct = [
-  auth,
+exports.requestProduct = [
+  BuyerAuh,
   async (req, res) => {
   try {
     let {productId} = req.body;
@@ -341,7 +342,7 @@ exports.buyProduct = [
       return apiResponse.ErrorResponse(res,"You can not buy your own product");
     }
     else{
-      let buy = await Models.ProductBuy.findOne({
+      let buy = await Models.ProductRequest.findOne({
         where: {id: productId}
       });
 
@@ -349,7 +350,7 @@ exports.buyProduct = [
         return apiResponse.ErrorResponse(res,"You have already buyed this Product");
       }
       else{
-        await Models.ProductBuy.create({
+        await Models.ProductRequest.create({
           listingId: pro.id,
           userId: req.user.id
         });
@@ -363,7 +364,7 @@ exports.buyProduct = [
 }]
 
 exports.biddingProduct = [
-  auth,
+  BuyerAuh,
   async (req, res) => {
   try {
     let {productId, price} = req.body;
@@ -408,15 +409,15 @@ exports.biddingProduct = [
   }
 }]
 
-exports.ProductBuyers = [
-  auth,
+exports.productRequests = [
+  SellerAuh,
   async (req, res) => {
   try{
     let listing = await Models.ListingProduct.findAll({
       where: { owner: req.user.id },
       include: [{
-        model: Models.ProductBuy,
-        as: "buyers", // Use the default alias assigned by Sequelize
+        model: Models.ProductRequest,
+        as: "request", // Use the default alias assigned by Sequelize
         include: {
           model: Models.User,
           as: "user", // Use the default alias assigned by Sequelize
@@ -426,15 +427,15 @@ exports.ProductBuyers = [
       }]
     });
         
-      return apiResponse.successResponseWithData(res, "Product Buyyers", listing);
+      return apiResponse.successResponseWithData(res, "Product Request", listing);
   }catch(err){
     console.log(err)
     return apiResponse.ErrorResponse(res, "Something went wrong")
   }
 }]
 
-exports.ProductBidders = [
-  auth,
+exports.productBidders = [
+  SellerAuh,
   async (req, res) => {
   try{
       let listing = await Models.ListingProduct.findAll({
@@ -458,8 +459,8 @@ exports.ProductBidders = [
   }
 }]
 
-exports.AnalyticProduct = [
-  auth,
+exports.analyticProduct = [
+  SellerAuh,
   async (req, res) => {
   try{
       let totalProducts = await Models.ListingProduct.findAll({
@@ -471,7 +472,6 @@ exports.AnalyticProduct = [
 
       totalProducts.forEach(x => ids.push(x.id));
 
-      console.log(ids)
       let totalBids = await Models.ProductBidding.count({
         where: {
           listingId:{
@@ -480,7 +480,7 @@ exports.AnalyticProduct = [
         }
       })
 
-      let totalBuys = await Models.ProductBuy.count({
+      let totalRequest = await Models.ProductRequest.count({
         where: {
           listingId:{
             [Op.in]: ids
@@ -491,7 +491,7 @@ exports.AnalyticProduct = [
       return apiResponse.successResponseWithData(res, "Analytics",{
         totalProducts: totalProducts.length,
         totalBids,
-        totalBuys
+        totalRequest
       })
 
   }catch(err){

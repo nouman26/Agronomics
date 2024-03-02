@@ -9,9 +9,10 @@ router.get("/my",Controller.ProductController.getMyProduct);
 router.get("/user/:id",Controller.ProductController.getUserProduct);
 router.get("/details/:id",Controller.ProductController.getProducDetails);
 router.post("/search",Controller.ProductController.search);
-router.post("/buy",Controller.ProductController.buyProduct);
+router.post("/request",Controller.ProductController.requestProduct);
 router.post("/bid",Controller.ProductController.biddingProduct);
-router.get("/buyers",Controller.ProductController.ProductBuyers);
-router.get("/bidders",Controller.ProductController.ProductBidders);
-router.get("/analytic",Controller.ProductController.AnalyticProduct);
+router.get("/requests",Controller.ProductController.productRequests);
+router.get("/bidders",Controller.ProductController.productBidders);
+router.get("/analytic",Controller.ProductController.analyticProduct);
+
 module.exports = router;

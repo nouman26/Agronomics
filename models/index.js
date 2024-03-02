@@ -68,13 +68,17 @@ db.Address.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASC
 db.ListingProduct.hasMany(db.ProductBidding, { as: "bidders", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
 db.ProductBidding.belongsTo(db.ListingProduct, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
 
-// =============== Relation Between Product and Product Sell ===============
-db.ListingProduct.hasMany(db.ProductBuy, { as: "buyers", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
-db.ProductBuy.belongsTo(db.ListingProduct, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+// =============== Relation Between Product Listing and Address ===============
+db.Address.hasOne(db.ListingProduct, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addressId", allowNull: true } })
+db.ListingProduct.belongsTo(db.ListingProduct, { as: "address", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addressId", allowNull: true } })
 
-// =============== Relation Between User and Product Sell ===============
-db.User.hasMany(db.ProductBuy, { as: "productbuy", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
-db.ProductBuy.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+// =============== Relation Between Product and Product Request ===============
+db.ListingProduct.hasMany(db.ProductRequest, { as: "request", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+db.ProductRequest.belongsTo(db.ListingProduct, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "listingId", allowNull: true } })
+
+// =============== Relation Between User and Product Request ===============
+db.User.hasMany(db.ProductRequest, { as: "productRequest", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
+db.ProductRequest.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
 
 // =============== Relation Between User and Product Bidding ===============
 db.User.hasMany(db.ProductBidding, { as: "bidding", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })

@@ -6,12 +6,9 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true
       },
       address: DataTypes.STRING,
-      city: DataTypes.STRING,
-      province: DataTypes.STRING, 
-      pincode: DataTypes.INTEGER, 
-      country: DataTypes.STRING, 
-      latitude: DataTypes.FLOAT, 
-      longitude: DataTypes.FLOAT
+      tehsil: DataTypes.STRING,
+      city: DataTypes.STRING, 
+      district: DataTypes.STRING,
   },{
     underscored: true,
   });
