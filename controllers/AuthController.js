@@ -7,6 +7,7 @@ const sendMessage = require("../helpers/sendMessage");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 let SellerAuh = require("../middlewares/sellerAuth");
+const CommonAuth = require("../middlewares/commonAuth")
 
 const storage = multer.diskStorage({
      destination: (req, file, cb) => {
@@ -107,6 +108,7 @@ exports.passwordLessLogin = [
 }];
 
 exports.switchRole = [
+     CommonAuth,
      async (req, res) => {
      try{
           let userData = await Models.User.findOne({
