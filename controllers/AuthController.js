@@ -385,7 +385,7 @@ exports.allUser = [
      async (req, res) => {
      try{
           let userData = await Models.User.findAll({
-               where: {},
+               where: {isSeller:true},
                attributes: { exclude: ['otp','otpTries','otpExpiry'] }
           });
           return apiResponse.successResponseWithData(res, "Users fetched successfully", userData);

@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
         brand: DataTypes.STRING,
         ProductType: DataTypes.STRING,
         image: DataTypes.JSON,
-        name: DataTypes.STRING
+        name: DataTypes.STRING,
+        addressId: DataTypes.ARRAY(DataTypes.INTEGER)
     },{
         underscored: true,
       });

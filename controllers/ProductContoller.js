@@ -140,7 +140,7 @@ exports.addProduct = [
                     ProductType:  req.body.ProductType,
                     image: images,
                     owner: req.user.id,
-                    addressId: req.body.addressId
+                    addressId: (req.body.addressId) ? JSON.parse(req.body.addressId) : []
                 })
 
                 return apiResponse.successResponse(res,"Product Stored Sucessfully")
@@ -255,11 +255,7 @@ exports.getProducDetails = [
           include: {
             model: Models.User,
             as: "user", // Use the default alias assigned by Sequelize
-            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] },
-            include: {
-              model: Models.Address,
-              as: "address" // Use the default alias assigned by Sequelize 
-            }
+            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] }
           }
         });
         if(listing){
@@ -285,9 +281,20 @@ exports.getProducDetails = [
           let mainPro = {...product.dataValues};
           delete mainPro.id;
 
-          let final = {...listing.dataValues, ...mainPro, composition};
+          address = [];
+
+          if(listing.addressId && listing.addressId.length > 0){
+            address = await Models.Address.findAll({
+              where: {
+                id: listing.addressId
+              }
+            })
+          }
+
+          let final = {...listing.dataValues, ...mainPro, composition, address};
           delete final.productId;
           delete final.owner;
+          delete final.addressId
           return apiResponse.successResponseWithData(res, "Product Details", final);
         }
         else{
