@@ -112,7 +112,7 @@ exports.addProduct = [
                       for await(let comp of req.body.composition){
                         await Models.Composition.create({
                           name: comp.name,
-                          value: comp.value,
+                          percentage: comp.percentage,
                           productId: product.id
                         })
                       }
@@ -317,6 +317,9 @@ exports.search = [
       }
       if(req.body.productType){
         filter.ProductType = req.body.productType
+      }
+      if(req.body.category){
+        filter.ProductType = req.body.category
       }
       const products = await Models.Product.findAll({
         where: filter,
