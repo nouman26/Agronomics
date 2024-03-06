@@ -235,7 +235,7 @@ exports.profileUpdate = [
           if (description) update.description = description;
 
           if (location){
-               const {address, city, tehsil, district} = req.body.location;
+               const {shop, address, city, tehsil, district} = req.body.location;
                if (!address) return apiResponse.validationErrorWithData(res, "Please provide address");
                if (!city) return apiResponse.validationErrorWithData(res, "Please provide city");
                if (!tehsil) return apiResponse.validationErrorWithData(res, "Please provide tehsil");
@@ -243,10 +243,11 @@ exports.profileUpdate = [
               
                await Models.Address.create({
                     userId: req.user.id,
+                    shop,
                     address,
-                    city: city,
-                    tehsil: tehsil,
-                    district: district
+                    city,
+                    tehsil,
+                    district
                });
           }
 
@@ -301,7 +302,7 @@ exports.updateAddress = [
      SellerAuh,
      async (req, res) => {
      try{
-          const { id, address, district, tehsil, city } = req.body;
+          const { id, shop, address, district, tehsil, city } = req.body;
           if (!address) return apiResponse.validationErrorWithData(res, "Please provide address");
           if (!city) return apiResponse.validationErrorWithData(res, "Please provide city");
           if (!tehsil) return apiResponse.validationErrorWithData(res, "Please provide tehsil");
@@ -314,10 +315,11 @@ exports.updateAddress = [
                if (!data) return apiResponse.validationErrorWithData(res, "Address not found");
               
                data = await Models.Address.update({
-                    address: address,
-                    city: city,
-                    tehsil: tehsil,
-                    district: district
+                    shop,
+                    address,
+                    city,
+                    tehsil,
+                    district
                },
                {
                     where: { id: id },
@@ -327,10 +329,11 @@ exports.updateAddress = [
           else{
                let data = await Models.Address.create({
                     userId: req.user.id,
-                    address: address,
-                    city: city,
-                    tehsil: tehsil,
-                    district: district
+                    shop,
+                    address,
+                    city,
+                    tehsil,
+                    district
                });
                return apiResponse.successResponseWithData(res, "Address added successfully", data);
           }

@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
           primaryKey: true,
           autoIncrement: true
         },
+        brand: DataTypes.STRING,
         name: DataTypes.STRING,
         horsePower: DataTypes.FLOAT,
         model: DataTypes.STRING,
@@ -12,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         image: DataTypes.JSON,
         price: DataTypes.INTEGER,
         discount: DataTypes.FLOAT,
-        description: DataTypes.STRING
+        description: DataTypes.STRING,
     },{
         underscored: true,
       });

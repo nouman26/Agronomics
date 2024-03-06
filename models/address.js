@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true
       },
+      shop: DataTypes.STRING,
       address: DataTypes.STRING,
       tehsil: DataTypes.STRING,
       city: DataTypes.STRING, 

@@ -84,6 +84,7 @@ exports.addProduct = [
                 else if(req.body.productType == "Machinary"){
                     product = await Models.MachineryProduct.create({
                         name: req.body.name,
+                        brand: req.body.brand,
                         horsePower: req.body.horsePower,
                         model: req.body.model,
                         condition: req.body.condition,
@@ -96,6 +97,7 @@ exports.addProduct = [
                 else if(!req.body.isAlreadyExists){
                     product = await Models.Product.create({
                         name: req.body.name,
+                        brand:  req.body.brand,
                         description:  req.body.description,
                         pkgType:  req.body.pkgType,
                         weightUnit: req.body.weightUnit,
@@ -136,7 +138,6 @@ exports.addProduct = [
                     shipping:  req.body.shipping,
                     price:  req.body.price,
                     tax:   req.body.tax,
-                    brand:  req.body.brand,
                     ProductType:  req.body.ProductType,
                     image: images,
                     owner: req.user.id,
