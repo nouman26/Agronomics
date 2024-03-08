@@ -272,7 +272,7 @@ exports.getProducDetails = [
           }
 
           let composition = await product.getComposition({
-            attributes:["name","value"]
+            attributes:["name","percentage"]
           });
 
           if(!product){
