@@ -334,12 +334,12 @@ exports.search = [
         order: [['createdAt', 'DESC']]
       });
 
-      const seeds = await Models.Product.findAll({
+      const seeds = await Models.SeedProducts.findAll({
         where: filter,
         order: [['createdAt', 'DESC']]
       });
 
-      const machinary = await Models.Product.findAll({
+      const machinary = await Models.MachineryProduct.findAll({
         where: filter,
         order: [['createdAt', 'DESC']]
       });
