@@ -345,9 +345,9 @@ exports.search = [
       });
 
       let products = [];
-      if(common) products = products.push(...common)
-      if(seeds) products = products.push(...seeds)
-      if(machinary) products = products.push(...machinary)
+      if(common) products.push(...common)
+      if(seeds) products.push(...seeds)
+      if(machinary) products.push(...machinary)
 
       return apiResponse.successResponseWithData(res, "Search Result", products)
   } catch (err) {
