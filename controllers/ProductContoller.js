@@ -120,9 +120,21 @@ exports.addProduct = [
                   }
                 }
                 else{
-                  product = await Models.Product.findOne({
-                    where: { id: req.body.productId},
-                  });
+                  if(req.body.productType == "Seed"){
+                    product = await Models.SeedProducts.findOne({
+                      where: { id: req.body.productId},
+                    });
+                  }
+                  else if(req.body.productType == "Machinary & Tools"){
+                    product = await Models.MachineryProduct.findOne({
+                      where: { id: req.body.productId},
+                    });
+                  }
+                  else{
+                    product = await Models.Product.findOne({
+                      where: { id: req.body.productId},
+                    });
+                  }
                   if(!product){
                     return apiResponse.successResponse(res, "Main Product not found")
                   }
@@ -333,9 +345,9 @@ exports.search = [
       });
 
       let products = [];
-      if(common) products = [...products, ...common]
-      if(seeds) products = [...products, ...seeds]
-      if(machinary) products = [...products, ...machinary]
+      if(common) products = products.push(...common)
+      if(seeds) products = products.push(...seeds)
+      if(machinary) products = products.push(...machinary)
 
       return apiResponse.successResponseWithData(res, "Search Result", products)
   } catch (err) {
