@@ -322,6 +322,16 @@ exports.search = [
             [Op.iLike]: `%${req.body.query}%` // Case-insensitive search
           }
       }
+      const seeds = await Models.SeedProducts.findAll({
+        where: filter,
+        order: [['createdAt', 'DESC']]
+      });
+
+      const machinary = await Models.MachineryProduct.findAll({
+        where: filter,
+        order: [['createdAt', 'DESC']]
+      });
+      
       if(req.body.productType){
         filter.ProductType = req.body.productType
       }
@@ -330,16 +340,6 @@ exports.search = [
       }
 
       const common = await Models.Product.findAll({
-        where: filter,
-        order: [['createdAt', 'DESC']]
-      });
-
-      const seeds = await Models.SeedProducts.findAll({
-        where: filter,
-        order: [['createdAt', 'DESC']]
-      });
-
-      const machinary = await Models.MachineryProduct.findAll({
         where: filter,
         order: [['createdAt', 'DESC']]
       });
