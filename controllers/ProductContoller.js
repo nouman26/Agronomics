@@ -333,9 +333,9 @@ exports.search = [
       });
 
       let products = [];
-      if(common) products = [...products, ...common.dataValues]
-      if(seeds) products = [...products, ...seeds.dataValues]
-      if(machinary) products = [...products, ...machinary.dataValues]
+      if(common) products = [...products, ...common]
+      if(seeds) products = [...products, ...seeds]
+      if(machinary) products = [...products, ...machinary]
 
       return apiResponse.successResponseWithData(res, "Search Result", products)
   } catch (err) {
