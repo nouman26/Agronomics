@@ -16,9 +16,9 @@
   
   "production": {
     "username": "postgres",
-    "password": "postgres",
-    "database": "postgres",
-    "host": "localhost",
+    "password": "greenage",
+    "database": "farmacie",
+    "host": "192.168.100.17",
     "port": 5432,
     "dialect": "postgres",
     "pool": {
