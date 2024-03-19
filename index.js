@@ -27,7 +27,7 @@ const limiter = rateLimit({
 
 //To allow cross-origin requests
 app.use(cors());
-app.use(limiter)
+// app.use(limiter)
 
 //Route Prefixes
 app.use("/", indexRouter);
