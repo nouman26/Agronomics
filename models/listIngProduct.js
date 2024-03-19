@@ -9,11 +9,8 @@ module.exports = (sequelize, DataTypes) => {
         availableFrom: DataTypes.DATEONLY,
         shelfLifeEnd: DataTypes.DATEONLY,
         bidding: DataTypes.STRING,
-        shipping: DataTypes.STRING,
         price:  DataTypes.INTEGER,
-        tax:  DataTypes.STRING,
         ProductType: DataTypes.STRING,
-        image: DataTypes.JSON,
         name: DataTypes.STRING,
         addressId: DataTypes.ARRAY(DataTypes.INTEGER)
     },{

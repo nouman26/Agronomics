@@ -5,6 +5,7 @@ const randomNumber = require("../helpers/randomNumber");
 const moment = require("moment");
 const sendMessage = require("../helpers/sendMessage");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt")
 const multer = require("multer");
 let SellerAuh = require("../middlewares/sellerAuth");
 const CommonAuth = require("../middlewares/commonAuth")
@@ -28,6 +29,47 @@ const storage = multer.diskStorage({
  };
  
 const upload = multer({storage: storage, fileFilter: fileFilter}).single("avatar");
+
+exports.techLogin = [
+     async (req, res) => {
+     try{
+          const {email, password} = req.body;
+          if (!email || !password) return apiResponse.validationErrorWithData(res, "Email or Password is missing");
+     
+          userData = await Models.Admin.findOne({
+               where: { email: email.toLowerCase() },
+          });
+
+          if (!userData) {
+               return apiResponse.unauthorizedResponse(res, "User not found");
+          }
+          else {
+               let isCorrectPassword = await bcrypt.compare(password, user.password);
+               if (!isCorrectPassword) {
+                    return apiResponse.unauthorizedResponse(res, "Incorrect Password");
+               }
+               else{
+                    let tokenData = {
+                         id: userData.id,
+                         role: "admin"
+                    };
+                    
+                    const jwtPayload = tokenData;
+                    const jwtData = {
+                        expiresIn: process.env.JWT_TIMEOUT_DURATION,
+                    };
+                    const secret = process.env.JWT_SECRET;
+                    //Generated JWT token with Payload and secret.
+                    Object.assign(tokenData, {token: jwt.sign(jwtPayload, secret, jwtData)});
+                    return apiResponse.successResponseWithData(res, "Login Sucessfull", tokenData)
+               }
+          }
+     }
+     catch(err){
+          console.log(err);
+          return apiResponse.ErrorResponse(res, "Something went wrong");
+     }
+}];
 
 exports.passwordLessLogin = [
      async (req, res) => {

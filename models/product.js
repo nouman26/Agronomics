@@ -14,7 +14,9 @@ module.exports = (sequelize, DataTypes) => {
         pkgQuantity:  DataTypes.STRING,
         ProductType: DataTypes.STRING,
         category: DataTypes.STRING,
-        formType: DataTypes.STRING
+        formType: DataTypes.STRING,
+        isVerified: DataTypes.BOOLEAN,
+        image: DataTypes.JSON
     },{
         underscored: true,
       });

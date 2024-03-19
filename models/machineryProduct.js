@@ -9,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
         name: DataTypes.STRING,
         horsePower: DataTypes.FLOAT,
         model: DataTypes.STRING,
+        type: DataTypes.STRING,
         condition: DataTypes.STRING,
         image: DataTypes.JSON,
-        price: DataTypes.INTEGER,
         discount: DataTypes.FLOAT,
         description: DataTypes.STRING,
     },{

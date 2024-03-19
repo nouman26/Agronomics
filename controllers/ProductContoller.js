@@ -63,87 +63,82 @@ exports.addProduct = [
                 }
                 
                 let product;
-                if(req.body.productType == "Seed"){
-                    product = await Models.SeedProducts.create({
-                        brand: req.body.brand,
-                        seed: req.body.seed,
-                        seedVariety: req.body.seedVariety,
-                        seedType: req.body.seedType,
-                        suitableRegion: req.body.suitableRegion,
-                        seedWeight: req.body.seedWeight,
-                        pkgType: req.body.pkgType,
-                        weightUnit: req.body.weightUnit,
-                        pkgWeight: req.body.pkgWeight,
-                        pkgQuantity: req.body.pkgQuantity,
-                        tax: req.body.tax,
-                        price: req.body.price,
-                        shipping: req.body.shipping,
-                        image: images
-                    });
-                }
-                else if(req.body.productType == "Machinary"){
-                    product = await Models.MachineryProduct.create({
-                        name: req.body.name,
-                        brand: req.body.brand,
-                        horsePower: req.body.horsePower,
-                        model: req.body.model,
-                        condition: req.body.condition,
-                        image: images,
-                        price: req.body.price,
-                        discount: req.body.discount,
-                        description: req.body.description
-                    });
-                }
-                else if(!req.body.isAlreadyExists){
-                    product = await Models.Product.create({
-                        name: req.body.name,
-                        brand:  req.body.brand,
-                        description:  req.body.description,
-                        pkgType:  req.body.pkgType,
-                        weightUnit: req.body.weightUnit,
-                        pkgWeight:  req.body.pkgWeight,
-                        pkgQuantity:  req.body.pkgQuantity,
-                        ProductType: req.body.ProductType,
-                        category: req.body.category,
-                        formType: req.body.formType
-                    })
+                if(!req.body.isAlreadyExists){
+                  if(req.body.productType == "Seed"){
+                      product = await Models.SeedProducts.create({
+                          name: req.body.name,
+                          brand: req.body.brand,
+                          seed: req.body.seed,
+                          seedVariety: req.body.seedVariety,
+                          seedType: req.body.seedType,
+                          suitableRegion: req.body.suitableRegion,
+                          seedWeight: req.body.seedWeight,
+                          pkgType: req.body.pkgType,
+                          weightUnit: req.body.weightUnit,
+                          pkgWeight: req.body.pkgWeight,
+                          pkgQuantity: req.body.pkgQuantity,
+                          image: images
+                      });
+                  }
+                  else if(req.body.productType == "Machinary & Tools"){
+                      product = await Models.MachineryProduct.create({
+                          name: req.body.name,
+                          brand: req.body.brand,
+                          horsePower: req.body.horsePower,
+                          model: req.body.model,
+                          condition: req.body.condition,
+                          image: images,
+                          discount: req.body.discount,
+                          description: req.body.description,
+                          type: req.body.type
+                      });
+                  }
+                  else{
+                      product = await Models.Product.create({
+                          name: req.body.name,
+                          brand:  req.body.brand,
+                          description:  req.body.description,
+                          pkgType:  req.body.pkgType,
+                          weightUnit: req.body.weightUnit,
+                          pkgWeight:  req.body.pkgWeight,
+                          pkgQuantity:  req.body.pkgQuantity,
+                          ProductType: req.body.ProductType,
+                          category: req.body.category,
+                          formType: req.body.formType,
+                          image: images,
+                      })
 
-                    if(req.body.composition && req.body.composition.length > 0){
-                      for await(let comp of req.body.composition){
-                        await Models.Composition.create({
-                          name: comp.name,
-                          percentage: comp.percentage,
-                          productId: product.id
-                        })
+                      if(req.body.composition && req.body.composition.length > 0){
+                        for await(let comp of req.body.composition){
+                          await Models.Composition.create({
+                            name: comp.name,
+                            percentage: comp.percentage,
+                            productId: product.id
+                          })
+                        }
                       }
-                    }
+                  }
                 }
                 else{
-                    product = await Models.Product.findOne({
-                        where: { id: req.body.productId},
-                   });
-                }
-
-                if(!product){
-                  return apiResponse.successResponse(res, "Main Product not found")
-                }
-
-                await Models.ListingProduct.create({
-                    name: req.body.name,
+                  product = await Models.Product.findOne({
+                    where: { id: req.body.productId},
+                  });
+                  if(!product){
+                    return apiResponse.successResponse(res, "Main Product not found")
+                  }
+                  await Models.ListingProduct.create({
                     productId: product.id,
                     shelfLifeStart:  req.body.shelfLifeStart,
                     availableFrom:  req.body.availableFrom,
                     shelfLifeEnd:  req.body.shelfLifeEnd,
                     bidding:  req.body.bidding,
-                    shipping:  req.body.shipping,
                     price:  req.body.price,
-                    tax:   req.body.tax,
                     ProductType:  req.body.ProductType,
-                    image: images,
                     owner: req.user.id,
                     addressId: (req.body.addressId) ? JSON.parse(req.body.addressId) : []
-                })
-
+                  })
+                }
+                
                 return apiResponse.successResponse(res,"Product Stored Sucessfully")
             }
         })
@@ -321,10 +316,27 @@ exports.search = [
       if(req.body.category){
         filter.ProductType = req.body.category
       }
-      const products = await Models.Product.findAll({
+
+      const common = await Models.Product.findAll({
         where: filter,
         order: [['createdAt', 'DESC']]
       });
+
+      const seeds = await Models.Product.findAll({
+        where: filter,
+        order: [['createdAt', 'DESC']]
+      });
+
+      const machinary = await Models.Product.findAll({
+        where: filter,
+        order: [['createdAt', 'DESC']]
+      });
+
+      let products = [];
+      if(common) products = [...products, ...common.dataValues]
+      if(seeds) products = [...products, ...seeds.dataValues]
+      if(machinary) products = [...products, ...machinary.dataValues]
+
       return apiResponse.successResponseWithData(res, "Search Result", products)
   } catch (err) {
     console.error(err);

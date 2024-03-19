@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
           primaryKey: true,
           autoIncrement: true
         },
+        name: DataTypes.STRING,
         brand: DataTypes.STRING,
         seed: DataTypes.STRING,
         seedVariety: DataTypes.STRING,
@@ -15,9 +16,6 @@ module.exports = (sequelize, DataTypes) => {
         weightUnit: DataTypes.STRING,
         pkgWeight: DataTypes.FLOAT,
         pkgQuantity: DataTypes.INTEGER,
-        tax: DataTypes.INTEGER,
-        price: DataTypes.INTEGER,
-        shipping: DataTypes.STRING,
         image: DataTypes.JSON
     },{
         underscored: true,
