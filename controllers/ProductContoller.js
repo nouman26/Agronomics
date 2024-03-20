@@ -77,7 +77,9 @@ exports.addProduct = [
                           weightUnit: req.body.weightUnit,
                           pkgWeight: req.body.pkgWeight,
                           pkgQuantity: req.body.pkgQuantity,
-                          image: images
+                          image: images,
+                          isVerified: false,
+                          addedBy: req.user.id
                       });
                   }
                   else if(req.body.productType == "Machinary & Tools"){
@@ -90,7 +92,9 @@ exports.addProduct = [
                           image: images,
                           discount: req.body.discount,
                           description: req.body.description,
-                          type: req.body.type
+                          type: req.body.type,
+                          isVerified: false,
+                          addedBy: req.user.id
                       });
                   }
                   else{
@@ -106,13 +110,14 @@ exports.addProduct = [
                           category: req.body.category,
                           formType: req.body.formType,
                           image: images,
+                          isVerified: false,
+                          addedBy: req.user.id
                       })
 
                       if(req.body.composition && req.body.composition.length > 0){
                         for await(let comp of req.body.composition){
                           await Models.Composition.create({
                             name: comp.name,
-                            percentage: comp.percentage,
                             productId: product.id
                           })
                         }
@@ -138,6 +143,7 @@ exports.addProduct = [
                   if(!product){
                     return apiResponse.successResponse(res, "Main Product not found")
                   }
+                  
                   await Models.ListingProduct.create({
                     productId: product.id,
                     shelfLifeStart:  req.body.shelfLifeStart,
@@ -166,32 +172,61 @@ exports.getProductLisingsWRTType = [
     try{
       const { limit = 20, skip = 0 } = req.query;
 
-      if(req.body.params == "Seed"){
-        listingProducts = await Models.ListingProduct.findAll({
-          where: {ProductType:"Seed"},
-          limit: parseInt(limit),
-          offset: parseInt(skip),
-          order: [['createdAt', 'DESC']]
-        });
-      }
-      else if(req.body.params == "Machinary"){
-        listingProducts = await Models.ListingProduct.findAll({
-          where: {ProductType:"Machinary"},
-          limit: parseInt(limit),
-          offset: parseInt(skip),
-          order: [['createdAt', 'DESC']]
-        });
-      }
-      else{
-        listingProducts = await Models.ListingProduct.findAll({
-          where: { ProductType:req.params.category},
-          limit: parseInt(limit),
-          offset: parseInt(skip),
-          order: [['createdAt', 'DESC']]
-        });
-      }
+      let allProducts = await Models.ListingProduct.findAll({
+        where: { ProductType:req.params.category},
+        include: [
+          {
+            model: Models.Product,
+            as: "product"
+          },
+          {
+            model: Models.MachineryProduct,
+            as: "machineryProduct"
+          }, 
+          {
+            model: Models.SeedProducts,
+            as: "seedProducts"
+          }  
+        ],
+        // limit: parseInt(limit),
+        // offset: parseInt(skip),
+        order: [['createdAt', 'DESC']]
+      });
 
-        return apiResponse.successResponseWithData(res, "data", listingProducts)
+      let listingProducts = [];
+      allProducts.forEach(prop =>{
+        let x = prop.dataValues;
+        let temp;
+        if(x.seedProducts){
+          temp = {...x.seedProducts.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.machineryProduct){
+          temp = {...x.machineryProduct.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.product){
+          temp = {...x.product.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+
+        if(temp){
+          delete x.product;
+          delete x.machineryProduct;
+          delete x.seedProducts;
+
+          listingProducts.push({...x, ...temp})
+        }
+      })
+
+
+      return apiResponse.successResponseWithData(res, "data", listingProducts)
     }catch(err){
       console.log(err)
       return apiResponse.ErrorResponse(res, "Something went wrong")
@@ -203,11 +238,58 @@ exports.getProductLisings = [
     try{
       // const { limit = 20, skip = 0 } = req.query;
 
-      const listingProducts = await Models.ListingProduct.findAll({
+      let allProducts = await Models.ListingProduct.findAll({
+        where: {},
+        include: [
+          {
+            model: Models.Product,
+            as: "product"
+          },
+          {
+            model: Models.MachineryProduct,
+            as: "machineryProduct"
+          }, 
+          {
+            model: Models.SeedProducts,
+            as: "seedProducts"
+          }  
+        ],
         // limit: parseInt(limit),
         // offset: parseInt(skip),
         order: [['createdAt', 'DESC']]
       });
+
+      let listingProducts = [];
+      allProducts.forEach(prop =>{
+        let x = prop.dataValues;
+        let temp;
+        if(x.seedProducts){
+          temp = {...x.seedProducts.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.machineryProduct){
+          temp = {...x.machineryProduct.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.product){
+          temp = {...x.product.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+
+        if(temp){
+          delete x.product;
+          delete x.machineryProduct;
+          delete x.seedProducts;
+
+          listingProducts.push({...x, ...temp})
+        }
+      })
 
       return apiResponse.successResponseWithData(res, "data", listingProducts)
     }catch(err){
@@ -222,12 +304,59 @@ exports.getMyProduct = [
     try{
       // const { limit = 20, skip = 0 } = req.query;
 
-      const listingProducts = await Models.ListingProduct.findAll({
+      let allProducts = await Models.ListingProduct.findAll({
         where:{owner:req.user.id},
+        include: [
+          {
+            model: Models.Product,
+            as: "product"
+          },
+          {
+            model: Models.MachineryProduct,
+            as: "machineryProduct"
+          }, 
+          {
+            model: Models.SeedProducts,
+            as: "seedProducts"
+          }  
+        ],
         // limit: parseInt(limit),
         // offset: parseInt(skip),
         order: [['createdAt', 'DESC']]
       });
+
+      let listingProducts = [];
+      allProducts.forEach(prop =>{
+        let x = prop.dataValues;
+        let temp;
+        if(x.seedProducts){
+          temp = {...x.seedProducts.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.machineryProduct){
+          temp = {...x.machineryProduct.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.product){
+          temp = {...x.product.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+
+        if(temp){
+          delete x.product;
+          delete x.machineryProduct;
+          delete x.seedProducts;
+
+          listingProducts.push({...x, ...temp})
+        }
+      })
+
 
       return apiResponse.successResponseWithData(res, "data", listingProducts)
     }catch(err){
@@ -241,11 +370,57 @@ exports.getUserProduct = [
     try{
       // const { limit = 20, skip = 0 } = req.query;
 
-      const listingProducts = await Models.ListingProduct.findAll({
+      let allProducts = await Models.ListingProduct.findAll({
         where:{owner:req.params.id},
+        include: [
+          {
+            model: Models.Product,
+            as: "product"
+          },
+          {
+            model: Models.MachineryProduct,
+            as: "machineryProduct"
+          }, 
+          {
+            model: Models.SeedProducts,
+            as: "seedProducts"
+          }  
+        ],
         // limit: parseInt(limit),
         // offset: parseInt(skip),
         order: [['createdAt', 'DESC']]
+      });
+
+      let listingProducts = [];
+      allProducts.forEach(prop =>{
+        let x = prop.dataValues;
+        let temp;
+        if(x.seedProducts){
+          temp = {...x.seedProducts.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.machineryProduct){
+          temp = {...x.machineryProduct.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+        else if(x.product){
+          temp = {...x.product.dataValues}
+          delete temp.id;
+          delete createdAt;
+          delete updatedAt;
+        }
+
+        if(temp){
+          delete x.product;
+          delete x.machineryProduct;
+          delete x.seedProducts;
+
+          listingProducts.push({...x, ...temp})
+        }
       });
 
       return apiResponse.successResponseWithData(res, "data", listingProducts)

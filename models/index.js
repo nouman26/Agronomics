@@ -84,4 +84,8 @@ db.ProductBidding.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate
 db.User.hasMany(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedBy", allowNull: true } })
 db.Product.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedBy", allowNull: true } })
 
+// =============== Relation Between Admin and Product ===============
+db.Admin.hasMany(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedBy", allowNull: true } })
+db.Product.belongsTo(db.Admin, { as: "admin", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedBy", allowNull: true } })
+
 module.exports = db;

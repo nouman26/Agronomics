@@ -1,5 +1,6 @@
 module.exports = {
      AuthController: require("./AuthController"),
-     ProductController: require("./ProductContoller")
+     ProductController: require("./ProductContoller"),
+     TechController: require("./TechController")
 };
    

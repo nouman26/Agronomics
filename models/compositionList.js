@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Composition = sequelize.define("Composition", {
+    const CompositionList = sequelize.define("CompositionList", {
         id:{
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -9,6 +9,5 @@ module.exports = (sequelize, DataTypes) => {
     },{
         underscored: true,
     });
-    return Composition;
+    return CompositionList;
 };
-  

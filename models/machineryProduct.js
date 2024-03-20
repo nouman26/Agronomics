@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         image: DataTypes.JSON,
         discount: DataTypes.FLOAT,
         description: DataTypes.STRING,
+        isVerified: DataTypes.BOOLEAN,
     },{
         underscored: true,
       });

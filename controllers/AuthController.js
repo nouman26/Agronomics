@@ -40,16 +40,23 @@ exports.techLogin = [
                where: { email: email.toLowerCase() },
           });
 
+          // userData = await Models.Admin.create({
+          //      name: "Agronomics Admin",
+          //      email: "admin@agronomics.pk",
+          //      password: await bcrypt.hash("Asdf@1234", 10)
+          // });
+
           if (!userData) {
                return apiResponse.unauthorizedResponse(res, "User not found");
           }
           else {
-               let isCorrectPassword = await bcrypt.compare(password, user.password);
+               let isCorrectPassword = await bcrypt.compare(password, userData.password);
                if (!isCorrectPassword) {
                     return apiResponse.unauthorizedResponse(res, "Incorrect Password");
                }
                else{
                     let tokenData = {
+                         name: userData.name,
                          id: userData.id,
                          role: "admin"
                     };

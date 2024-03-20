@@ -16,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
         weightUnit: DataTypes.STRING,
         pkgWeight: DataTypes.FLOAT,
         pkgQuantity: DataTypes.INTEGER,
-        image: DataTypes.JSON
+        image: DataTypes.JSON,
+        isVerified: DataTypes.BOOLEAN,
     },{
         underscored: true,
       });
