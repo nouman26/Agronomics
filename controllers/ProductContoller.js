@@ -41,6 +41,9 @@ exports.addProduct = [
             else if (err) {
               res.status(500).send('Unknown error: ' + err.message);
             } 
+            else if (!req.body.productType) {
+              return apiResponse.ErrorResponse(res, "Product type is required")
+            } 
             else {
                 let images = [];
                 if (req.files && 
@@ -65,6 +68,7 @@ exports.addProduct = [
                 let product;
                 if(!req.body.isAlreadyExists){
                   if(req.body.productType == "Seed"){
+                    console.log("Seeds")
                       product = await Models.SeedProducts.create({
                           name: req.body.name,
                           brand: req.body.brand,
@@ -83,6 +87,7 @@ exports.addProduct = [
                       });
                   }
                   else if(req.body.productType == "Machinary & Tools"){
+                    console.log("Machinary & Tools")
                       product = await Models.MachineryProduct.create({
                           name: req.body.name,
                           brand: req.body.brand,
@@ -98,6 +103,7 @@ exports.addProduct = [
                       });
                   }
                   else{
+                    console.log("Common")
                       product = await Models.Product.create({
                           name: req.body.name,
                           brand:  req.body.brand,
