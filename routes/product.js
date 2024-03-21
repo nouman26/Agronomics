@@ -4,7 +4,7 @@ var router = express.Router();
 
 router.post("/add",Controller.ProductController.addProduct);
 router.get("/listings",Controller.ProductController.getProductLisings);
-router.get("/listings/:category",Controller.ProductController.getProductLisingsWRTType);
+router.post("/listings",Controller.ProductController.getProductLisingsWRTType);
 router.get("/my",Controller.ProductController.getMyProduct);
 router.get("/user/:id",Controller.ProductController.getUserProduct);
 router.get("/details/:id",Controller.ProductController.getProducDetails);

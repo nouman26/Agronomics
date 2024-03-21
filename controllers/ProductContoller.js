@@ -66,6 +66,7 @@ exports.addProduct = [
                 }
                 
                 let product;
+                let productKey;
                 if(!req.body.isAlreadyExists){
                   if(req.body.productType == "Seed"){
                     console.log("Seeds")
@@ -112,7 +113,7 @@ exports.addProduct = [
                           weightUnit: req.body.weightUnit,
                           pkgWeight:  req.body.pkgWeight,
                           pkgQuantity:  req.body.pkgQuantity,
-                          ProductType: req.body.ProductType,
+                          ProductType: req.body.productType,
                           category: req.body.category,
                           formType: req.body.formType,
                           image: images,
@@ -132,16 +133,19 @@ exports.addProduct = [
                 }
                 else{
                   if(req.body.productType == "Seed"){
+                    productKey = "seedProductId";
                     product = await Models.SeedProducts.findOne({
                       where: { id: req.body.productId},
                     });
                   }
                   else if(req.body.productType == "Machinary & Tools"){
+                    productKey = "mtProductId";
                     product = await Models.MachineryProduct.findOne({
                       where: { id: req.body.productId},
                     });
                   }
                   else{
+                    productKey = "productId";
                     product = await Models.Product.findOne({
                       where: { id: req.body.productId},
                     });
@@ -149,18 +153,19 @@ exports.addProduct = [
                   if(!product){
                     return apiResponse.successResponse(res, "Main Product not found")
                   }
-                  
+                  console.log(req.user.id)
                   await Models.ListingProduct.create({
-                    productId: product.id,
+                    [productKey]: product.id,
                     shelfLifeStart:  req.body.shelfLifeStart,
                     availableFrom:  req.body.availableFrom,
                     shelfLifeEnd:  req.body.shelfLifeEnd,
                     bidding:  req.body.bidding,
                     price:  req.body.price,
-                    ProductType:  req.body.ProductType,
+                    ProductType:  req.body.productType,
                     owner: req.user.id,
                     addressId: (req.body.addressId) ? JSON.parse(req.body.addressId) : []
                   })
+                  // .catch((e) => { console.error(e.message) })
                 }
                 
                 return apiResponse.successResponse(res,"Product Stored Sucessfully")
@@ -176,10 +181,13 @@ exports.addProduct = [
 exports.getProductLisingsWRTType = [
     async (req, res) => {
     try{
-      const { limit = 20, skip = 0 } = req.query;
+      // const { limit = 20, skip = 0 } = req.query;
+      if (!req.body.productType) {
+        return apiResponse.ErrorResponse(res, "Product type is required")
+      } 
 
       let allProducts = await Models.ListingProduct.findAll({
-        where: { ProductType:req.params.category},
+        where: { ProductType:req.body.productType},
         include: [
           {
             model: Models.Product,
@@ -253,12 +261,13 @@ exports.getProductLisings = [
           },
           {
             model: Models.MachineryProduct,
-            as: "machineryProduct"
+            as: "machineryProduct",
+            required: false
           }, 
           {
             model: Models.SeedProducts,
             as: "seedProducts"
-          }  
+          } 
         ],
         // limit: parseInt(limit),
         // offset: parseInt(skip),
@@ -441,27 +450,43 @@ exports.getProducDetails = [
     try{
         let listing = await Models.ListingProduct.findOne({
           where: {id:req.params.id},
-          include: {
+          include: [{
             model: Models.User,
             as: "user", // Use the default alias assigned by Sequelize
             attributes: { exclude: ['otp','otpTries','otpExpiry','status'] }
-          }
+          },
+          {
+            model: Models.Product,
+            as: "product",
+            include: {
+              model: Models.Composition,
+              as: "composition", // Use the default alias assigned by Sequelize
+            }
+          },
+          {
+            model: Models.MachineryProduct,
+            as: "machineryProduct",
+            required: false
+          }, 
+          {
+            model: Models.SeedProducts,
+            as: "seedProducts"
+          }]
         });
+
+
         if(listing){
           let product;
-          if(listing.productType == "Seed"){
-            product = await listing.getSeedProducts();
+          let composition = [];
+          if(listing.seedProducts){
+            product = await listing.seedProducts;
           }
-          else if(listing.productType == "Machinary"){
-            product = await listing.getMachineryProduct();
+          else if(listing.machineryProduct){
+            product = await listing.machineryProduct;
           }
           else{
-            product = await listing.getProduct();
+            product = await listing.product;
           }
-
-          let composition = await product.getComposition({
-            attributes:["name","percentage"]
-          });
 
           if(!product){
             return apiResponse.ErrorResponse(res, "Product not found")
@@ -469,6 +494,10 @@ exports.getProducDetails = [
 
           let mainPro = {...product.dataValues};
           delete mainPro.id;
+
+          if(mainPro.composition){
+            composition = [...mainPro.composition.dataValues]
+          }
 
           address = [];
 

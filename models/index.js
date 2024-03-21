@@ -45,12 +45,12 @@ db.Product.hasMany(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE
 db.ListingProduct.belongsTo(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
 
 // =============== Relation Between Seed and Product Listing ===============
-db.SeedProducts.hasOne(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
-db.ListingProduct.belongsTo(db.SeedProducts, { as: "seedProducts", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+db.SeedProducts.hasMany(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "seedProductId", allowNull: true } })
+db.ListingProduct.belongsTo(db.SeedProducts, { as: "seedProducts", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "seedProductId", allowNull: true } })
 
 // =============== Relation Between Machinary and Product Listing ===============
-db.MachineryProduct.hasOne(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
-db.ListingProduct.belongsTo(db.MachineryProduct, { as: "machineryProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
+db.MachineryProduct.hasMany(db.ListingProduct, { as: "listingProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "mtProductId", allowNull: true } })
+db.ListingProduct.belongsTo(db.MachineryProduct, { as: "machineryProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "mtProductId", allowNull: true } })
 
 // =============== Relation Between Composition and Product ===============
 db.Product.hasMany(db.Composition, { as: "composition", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "productId", allowNull: true } })
