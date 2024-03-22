@@ -494,8 +494,8 @@ exports.getProducDetails = [
 
           let mainPro = {...product.dataValues};
           delete mainPro.id;
-
-          if(mainPro.composition){
+          
+          if(mainPro.composition && mainPro.composition.length > 0){
             composition = [...mainPro.composition.dataValues]
           }
 
