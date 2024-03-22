@@ -7,6 +7,7 @@ router.get("/listings",Controller.ProductController.getProductLisings);
 router.post("/listings",Controller.ProductController.getProductLisingsWRTType);
 router.get("/my",Controller.ProductController.getMyProduct);
 router.get("/user/:id",Controller.ProductController.getUserProduct);
+router.get("/delete/:id",Controller.ProductController.deleteProduct);
 router.get("/details/:id",Controller.ProductController.getProducDetails);
 router.post("/search",Controller.ProductController.search);
 router.post("/request",Controller.ProductController.requestProduct);

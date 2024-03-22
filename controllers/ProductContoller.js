@@ -68,8 +68,9 @@ exports.addProduct = [
                 let product;
                 let productKey;
                 if(!req.body.isAlreadyExists){
-                  if(req.body.productType == "Seed"){
-                    console.log("Seeds")
+                  if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
+                      console.log("Seeds")
+                      req.body.productType = "Seed Varieties"
                       product = await Models.SeedProducts.create({
                           name: req.body.name,
                           brand: req.body.brand,
@@ -82,6 +83,7 @@ exports.addProduct = [
                           weightUnit: req.body.weightUnit,
                           pkgWeight: req.body.pkgWeight,
                           pkgQuantity: req.body.pkgQuantity,
+                          description: req.body.description,
                           image: images,
                           isVerified: false,
                           addedBy: req.user.id
@@ -104,7 +106,7 @@ exports.addProduct = [
                       });
                   }
                   else{
-                    console.log("Common")
+                      console.log("Common")
                       product = await Models.Product.create({
                           name: req.body.name,
                           brand:  req.body.brand,
@@ -114,6 +116,7 @@ exports.addProduct = [
                           pkgWeight:  req.body.pkgWeight,
                           pkgQuantity:  req.body.pkgQuantity,
                           ProductType: req.body.productType,
+                          description: req.body.description,
                           category: req.body.category,
                           formType: req.body.formType,
                           image: images,
@@ -132,7 +135,7 @@ exports.addProduct = [
                   }
                 }
                 else{
-                  if(req.body.productType == "Seed"){
+                  if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
                     productKey = "seedProductId";
                     product = await Models.SeedProducts.findOne({
                       where: { id: req.body.productId},
@@ -177,6 +180,32 @@ exports.addProduct = [
          return apiResponse.ErrorResponse(res, "Something went wrong");
     }
 }];
+
+exports.deleteProduct = [
+  async (req, res) => {
+  try{
+    if(req.query.type == "seed"){
+      await Models.SeedProducts.destroy({
+        where : {id:req.params.id}
+      })
+    }
+    else if(req.query.type == "machine"){
+      await Models.MachineryProduct.destroy({
+        where : {id:req.params.id}
+      })
+    }
+    else{
+      await Models.Product.destroy({
+        where : {id:req.params.id}
+      })
+    }
+    
+    return apiResponse.successResponse(res, "Deleted Sucessfully")
+  }catch(err){
+    console.log(err)
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
+}]
 
 exports.getProductLisingsWRTType = [
     async (req, res) => {
@@ -479,13 +508,13 @@ exports.getProducDetails = [
           let product;
           let composition = [];
           if(listing.seedProducts){
-            product = await listing.seedProducts;
+            product = {...listing.seedProducts};
           }
           else if(listing.machineryProduct){
-            product = await listing.machineryProduct;
+            product = {...listing.machineryProduct};
           }
           else{
-            product = await listing.product;
+            product = {...listing.product};
           }
 
           if(!product){
@@ -496,7 +525,7 @@ exports.getProducDetails = [
           delete mainPro.id;
           
           if(mainPro.composition && mainPro.composition.length > 0){
-            composition = [...mainPro.composition.dataValues]
+            composition = [...mainPro.composition]
           }
 
           address = [];
@@ -532,33 +561,69 @@ exports.search = [
             [Op.iLike]: `%${req.body.query}%` // Case-insensitive search
           }
       }
-      const seeds = await Models.SeedProducts.findAll({
-        where: filter,
-        order: [['createdAt', 'DESC']]
-      });
-
-      const machinary = await Models.MachineryProduct.findAll({
-        where: filter,
-        order: [['createdAt', 'DESC']]
-      });
       
-      if(req.body.productType){
-        filter.ProductType = req.body.productType
+      let products;
+      if(req.body.productType || req.body.category){
+        if(req.body.category){
+          req.body.productType = req.body.category
+        }
+        
+        if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
+          products = await Models.SeedProducts.findAll({
+            where: filter,
+            order: [['createdAt', 'DESC']]
+          });
+        }
+        else if(req.body.productType == "Machinary & Tools"){
+          products = await Models.MachineryProduct.findAll({
+            where: filter,
+            order: [['createdAt', 'DESC']]
+          });
+        }
+        else {
+          filter.ProductType = req.body.productType;
+          products = await Models.Product.findAll({
+            where: filter,
+            order: [['createdAt', 'DESC']],
+            include: {
+              model: Models.Composition,
+              as: "composition", // Use the default alias assigned by Sequelize
+            },
+          });
+        }
       }
-      if(req.body.category){
-        filter.ProductType = req.body.category
+      else{
+        const seeds = await Models.SeedProducts.findAll({
+          where: filter,
+          order: [['createdAt', 'DESC']]
+        });
+  
+        const machinary = await Models.MachineryProduct.findAll({
+          where: filter,
+          order: [['createdAt', 'DESC']]
+        });
+
+        if(req.body.productType){
+          filter.ProductType = req.body.productType;
+        }
+        if(req.body.category){
+          filter.ProductType = req.body.category;
+        }
+  
+        const common = await Models.Product.findAll({
+          where: filter,
+          order: [['createdAt', 'DESC']],
+          include: {
+            model: Models.Composition,
+            as: "composition", // Use the default alias assigned by Sequelize
+          },
+        });
+  
+        products = [];
+        if(common) products.push(...common)
+        if(seeds) products.push(...seeds)
+        if(machinary) products.push(...machinary)
       }
-
-      const common = await Models.Product.findAll({
-        where: filter,
-        order: [['createdAt', 'DESC']]
-      });
-
-      let products = [];
-      if(common) products.push(...common)
-      if(seeds) products.push(...seeds)
-      if(machinary) products.push(...machinary)
-
       return apiResponse.successResponseWithData(res, "Search Result", products)
   } catch (err) {
     console.error(err);
