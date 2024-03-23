@@ -80,9 +80,25 @@ db.ProductRequest.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate
 db.User.hasMany(db.ProductBidding, { as: "bidding", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
 db.ProductBidding.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "userId", allowNull: true } })
 
+// =============== Relation Between User and SeedProduct ===============
+db.User.hasMany(db.SeedProducts, { as: "seedProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "seedAddedBy", allowNull: true } })
+db.SeedProducts.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "seedAddedBy", allowNull: true } })
+
+// =============== Relation Between User and MachinaryProduct ===============
+db.User.hasMany(db.MachineryProduct, { as: "machineProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "machineAddedBy", allowNull: true } })
+db.MachineryProduct.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "machineAddedBy", allowNull: true } })
+
 // =============== Relation Between User and Product ===============
 db.User.hasMany(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedBy", allowNull: true } })
 db.Product.belongsTo(db.User, { as: "user", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedBy", allowNull: true } })
+
+// =============== Relation Between Admin and SeedProduct ===============
+db.Admin.hasMany(db.SeedProducts, { as: "seedProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "seedAddedByAdmin", allowNull: true } })
+db.SeedProducts.belongsTo(db.Admin, { as: "admin", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "seedAddedByAdmin", allowNull: true } })
+
+// =============== Relation Between Admin and MachinaryProduct ===============
+db.Admin.hasMany(db.MachineryProduct, { as: "machineProduct", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "machineAddedByAdmin", allowNull: true } })
+db.MachineryProduct.belongsTo(db.Admin, { as: "admin", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "machineAddedByAdmin", allowNull: true } })
 
 // =============== Relation Between Admin and Product ===============
 db.Admin.hasMany(db.Product, { as: "product", onDelete: "CASCADE", onUpdate: "CASCADE", foreignKey: { name: "addedByAdmin", allowNull: true } })

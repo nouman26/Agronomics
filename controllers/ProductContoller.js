@@ -86,7 +86,7 @@ exports.addProduct = [
                           description: req.body.description,
                           image: images,
                           isVerified: false,
-                          addedBy: req.user.id
+                          seedAddedBy: req.user.id
                       });
                   }
                   else if(req.body.productType == "Machinary & Tools"){
@@ -102,7 +102,7 @@ exports.addProduct = [
                           description: req.body.description,
                           type: req.body.type,
                           isVerified: false,
-                          addedBy: req.user.id
+                          machineAddedBy: req.user.id
                       });
                   }
                   else{
