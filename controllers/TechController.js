@@ -3,6 +3,7 @@ const apiResponse = require("../helpers/apiResponse");
 let TechAuth = require("../middlewares/techAuth");
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -277,7 +278,6 @@ exports.addProductImage = [
           }
 
           let images = [];
-
           if(product && product.dataValues && product.dataValues.image && product.dataValues.image.length > 0){
             images = [...product.dataValues.image];
           }
@@ -286,19 +286,19 @@ exports.addProductImage = [
 
           if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
             await Models.SeedProducts.update(
-              {images},
+              {image: images},
               {where: {id: req.body.id}}
             )
           }
           else if(req.body.productType == "Machinary & Tools"){
             await Models.MachineryProduct.update(
-              {images},
+              {image: images},
               {where: {id: req.body.id}}
             )
           }
           else{
             await Models.Product.update(
-              {images},
+              {image: images},
               {where: {id: req.body.id}}
             )
           }
@@ -351,6 +351,17 @@ exports.deleteProductImage = [
 
       let images = [];
 
+      let imagePath = path.join(__dirname, "../public", req.body.imageName)
+
+      await fs.unlink(imagePath, (err => {
+        if (err) console.log(err);
+        else {
+          console.log(
+            "Deleted Symbolic Link: symlinkToFile"
+          )
+        }
+      }));
+
       if(product && product.dataValues && product.dataValues.image && product.dataValues.image.length > 0){
         images = [...product.dataValues.image];
         images = images.filter(x => x !== req.body.imageName);
@@ -358,19 +369,19 @@ exports.deleteProductImage = [
 
       if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
         await Models.SeedProducts.update(
-          {images},
+          {image: images},
           {where: {id: req.body.id}}
         );
       }
       else if(req.body.productType == "Machinary & Tools"){
         await Models.MachineryProduct.update(
-          {images},
+          {image: images},
           {where: {id: req.body.id}}
         );
       }
       else{
         await Models.Product.update(
-          {images},
+          {image: images},
           {where: {id: req.body.id}}
         );
       }
