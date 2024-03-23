@@ -84,6 +84,7 @@ exports.addProduct = [
                           pkgWeight: req.body.pkgWeight,
                           pkgQuantity: req.body.pkgQuantity,
                           description: req.body.description,
+                          ProductType:  req.body.productType,
                           image: images,
                           isVerified: false,
                           seedAddedBy: req.user.id
@@ -101,6 +102,7 @@ exports.addProduct = [
                           discount: req.body.discount,
                           description: req.body.description,
                           type: req.body.type,
+                          ProductType:  req.body.productType,
                           isVerified: false,
                           machineAddedBy: req.user.id
                       });

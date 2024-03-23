@@ -79,6 +79,7 @@ exports.addProduct = [
                       pkgWeight: req.body.pkgWeight,
                       pkgQuantity: req.body.pkgQuantity,
                       description: req.body.description,
+                      ProductType:  req.body.productType,
                       image: images,
                       isVerified: true,
                       seedAddedByAdmin: req.user.id
@@ -96,6 +97,7 @@ exports.addProduct = [
                       discount: req.body.discount,
                       description: req.body.description,
                       type: req.body.type,
+                      ProductType:  req.body.productType,
                       isVerified: true,
                       machineAddedByAdmin: req.user.id
                   });
@@ -391,6 +393,141 @@ exports.deleteProductImage = [
       console.log(err);
       return apiResponse.ErrorResponse(res, "Something went wrong");
  }
+}];
+
+exports.deleteProduct = [
+  TechAuth,
+  async (req, res) => {
+  try{
+    if (!req.body.id) {
+      return apiResponse.ErrorResponse(res, "Product is is required")
+    } 
+    else if (!req.body.productType) {
+      return apiResponse.ErrorResponse(res, "Product Type is required")
+    }
+    else {
+      let product;
+      if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
+        product = await Models.SeedProducts.findOne(
+          {where: {id: req.body.id}}
+        )
+      }
+      else if(req.body.productType == "Machinary & Tools"){
+        product = await Models.MachineryProduct.findOne(
+          {where: {id: req.body.id}}
+        )
+      }
+      else{
+        product = await Models.Product.findOne(
+          {where: {id: req.body.id}}
+        )
+      }
+
+      if (!product) {
+        return apiResponse.ErrorResponse(res, "Product not found")
+      }
+
+      if (product && product.isVerified) {
+        return apiResponse.ErrorResponse(res, "Only unverified product will delete")
+      }
+
+      let images = [];
+      if(product && product.dataValues && product.dataValues.image && product.dataValues.image.length > 0){
+        images = [...product.dataValues.image];
+        for await(let img of images){
+          let imagePath = path.join(__dirname, "../public", img)
+          await fs.unlink(imagePath, (err => {
+            if (err) console.log(err);
+            else {
+              console.log("Deleted Symbolic Link: symlinkToFile")
+            }
+          }));
+        }
+      }
+
+      if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
+        await Models.SeedProducts.destroy(
+          {where: {id: req.body.id}}
+        );
+      }
+      else if(req.body.productType == "Machinary & Tools"){
+        await Models.MachineryProduct.destroy(
+          {where: {id: req.body.id}}
+        );
+      }
+      else{
+        await Models.Product.destroy(
+          {where: {id: req.body.id}}
+        );
+      }
+      return apiResponse.successResponse(res, "Product Deleted sucessfully")
+    }
+  }catch(err){
+      console.log(err);
+      return apiResponse.ErrorResponse(res, "Something went wrong");
+ }
+}];
+
+exports.productDetails = [
+  TechAuth,
+  async (req, res) => {
+  try{
+    if (!req.body.id) {
+      return apiResponse.ErrorResponse(res, "Product is is required")
+    } 
+    else if (!req.body.productType) {
+      return apiResponse.ErrorResponse(res, "Product Type is required")
+    }
+
+    let product;
+    if(req.body.productType){
+      if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
+        product = await Models.SeedProducts.findOne({
+          where: {id: req.body.id},
+          include: {
+            model: Models.User,
+            as: "user",
+            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] }
+          },
+        });
+      }
+      else if(req.body.productType == "Machinary & Tools"){
+        product = await Models.MachineryProduct.findOne({
+          where: {id: req.body.id},
+          include: {
+            model: Models.User,
+            as: "user",
+            attributes: { exclude: ['otp','otpTries','otpExpiry','status'] }
+          },
+        });
+      }
+      else {
+        product = await Models.Product.findOne({
+          where: {id: req.body.id},
+          include: [
+            {
+              model: Models.User,
+              as: "user",
+              attributes: { exclude: ['otp','otpTries','otpExpiry','status'] }
+            },
+            {
+              model: Models.Composition,
+              as: "composition", // Use the default alias assigned by Sequelize
+            }
+          ],
+        });
+      }
+
+      return apiResponse.successResponseWithData(res, "Product Fetched Sucessfully", product);
+    }
+    else{
+      return apiResponse.ErrorResponse(res, "Product type is required");
+    }
+  }
+  catch(err){
+    console.log(err);
+    return apiResponse.ErrorResponse(res, "Something went wrong");
+  }
 }];
 
 exports.approveProduct = [
