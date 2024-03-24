@@ -10,6 +10,7 @@ router.post("/product/add/image",Controller.TechController.addProductImage);
 router.post("/product/delete/image",Controller.TechController.deleteProductImage);
 router.post("/all/products",Controller.TechController.getProductsWRToType);
 router.post("/approve/product",Controller.TechController.approveProduct);
+router.get("/analytic",Controller.TechController.analyticProduct);
 
 // Composition
 router.post("/add/composition",Controller.TechController.addComposition);

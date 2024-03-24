@@ -216,7 +216,7 @@ exports.updateProduct = [
       },{
         where: {id: req.body.id}
       });
-      
+
       if(req.body.composition && req.body.composition.length > 0){
         await Models.Composition.destroy({where: {productId: req.body.id}})
         for await(let comp of req.body.composition){
@@ -697,6 +697,7 @@ exports.getProductsWRToType = [
 }];
 
 exports.addComposition = [
+  TechAuth,
   async (req, res) => {
     try{
       if(!req.body.name){
@@ -713,6 +714,7 @@ exports.addComposition = [
 }]
 
 exports.updateComposition = [
+  TechAuth,
   async (req, res) => {
     try{
       if(!req.body.name || !req.body.id){
@@ -732,6 +734,7 @@ exports.updateComposition = [
 }]
 
 exports.deleteComposition = [
+  TechAuth,
   async (req, res) => {
     try{
       if(!req.body.id){
@@ -761,4 +764,32 @@ exports.GetComposition = [
       console.log(err);
       return apiResponse.ErrorResponse(res, "Something went wrong");
     }
+}]
+
+exports.analyticProduct = [
+  TechAuth,
+  async (req, res) => {
+  try{
+      let totalListing = await Models.ListingProduct.count({where: {}});
+      let totalProducts = await Models.Product.count({where: {}});
+      let totalSeeds = await Models.SeedProducts.count({where: {}});
+      let totalMachins = await Models.MachineryProduct.count({where: {}});
+      let vProducts = await Models.Product.count({where: {isVerified: true}});
+      let vSeeds = await Models.SeedProducts.count({where: {isVerified: true}});
+      let vMachins = await Models.MachineryProduct.count({where: {isVerified: true}});
+      let uvProducts = await Models.Product.count({where: {isVerified: false}});
+      let uvSeeds = await Models.SeedProducts.count({where: {isVerified: false}});
+      let uvMachins = await Models.MachineryProduct.count({where: {isVerified: false}});
+
+      return apiResponse.successResponseWithData(res, "Analytics",{
+        listings: totalListing,
+        totalProducts: totalProducts + totalSeeds + totalMachins,
+        totalVerified: vProducts + vSeeds + vMachins,
+        totalUnVerified: uvProducts + uvSeeds + uvMachins
+      })
+
+  }catch(err){
+    console.log(err)
+    return apiResponse.ErrorResponse(res, "Something went wrong")
+  }
 }]
