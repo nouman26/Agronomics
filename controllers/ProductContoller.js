@@ -561,7 +561,8 @@ exports.search = [
       let filter =  {
           name: {
             [Op.iLike]: `%${req.body.query}%` // Case-insensitive search
-          }
+          },
+          isVerified: true
       }
       
       let products;

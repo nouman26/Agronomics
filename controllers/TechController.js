@@ -216,13 +216,13 @@ exports.updateProduct = [
       },{
         where: {id: req.body.id}
       });
-
+      
       if(req.body.composition && req.body.composition.length > 0){
-        await Models.Composition.destroy({where: {productId: req.body.productId}})
+        await Models.Composition.destroy({where: {productId: req.body.id}})
         for await(let comp of req.body.composition){
           await Models.Composition.create({
             name: comp.name,
-            productId: product.id
+            productId: req.body.id
           })
         }
       }
