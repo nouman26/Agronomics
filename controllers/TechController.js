@@ -537,21 +537,43 @@ exports.approveProduct = [
     if(!req.body.productId || !req.body.productType){
       return apiResponse.ErrorResponse(res,"Product Id is required");
     }
-    
-    if(req.body.productType == "Seed"){
+
+    let product;
+
+    if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
       product = await Models.SeedProducts.findOne(
+        {where: {id: req.body.productId}}
+      )
+    }
+    else if(req.body.productType == "Machinary & Tools"){
+      product = await Models.MachineryProduct.findOne(
+        {where: {id: req.body.productId}}
+      )
+    }
+    else{
+      product = await Models.Product.findOne(
+        {where: {id: req.body.productId}}
+      )
+    }
+
+    if (!product) {
+      return apiResponse.ErrorResponse(res, "Product not found")
+    }
+    
+    if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
+      product = await Models.SeedProducts.update(
         {isVerified: true},
         {where: { id: req.body.productId}},
       );
     }
     else if(req.body.productType == "Machinary & Tools"){
-      product = await Models.MachineryProduct.findOne(
+      product = await Models.MachineryProduct.update(
         {isVerified: true},
         {where: { id: req.body.productId}}
         );
     }
     else{
-      product = await Models.Product.findOne(
+      product = await Models.Product.update(
         {isVerified: true},
         {where: { id: req.body.productId}},
       );
