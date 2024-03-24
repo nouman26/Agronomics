@@ -305,7 +305,7 @@ exports.addProductImage = [
             )
           }
 
-          return apiResponse.successResponse(res, "Image added sucessfully")
+          return apiResponse.successResponseWithData(res, "Image added sucessfully", image);
       }
     })
   }catch(err){
