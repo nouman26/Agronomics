@@ -593,10 +593,10 @@ exports.getProductsWRToType = [
   try{
     let products;
     let filter = {};
-    if(req.body.status && req.body.status.toLowerCase() == "verified"){
+    if(req.body.status && (req.body.status.toLowerCase() == "verified" || req.body.status.toLowerCase() == "verfied")){
       filter.isVerified = true;
     }
-    else if(req.body.status && req.body.status.toLowerCase() == "unverified"){
+    else if(req.body.status && (req.body.status.toLowerCase() == "unverified" || req.body.status.toLowerCase() == "unverfied")){
       filter.isVerified = false;
     }
 
