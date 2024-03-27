@@ -125,6 +125,8 @@ exports.addProduct = [
                     for await(let comp of req.body.composition){
                       await Models.Composition.create({
                         name: comp.name,
+                        unit: comp.unit,
+                        volume: comp.volume,
                         productId: product.id
                       })
                     }
@@ -222,6 +224,8 @@ exports.updateProduct = [
         for await(let comp of req.body.composition){
           await Models.Composition.create({
             name: comp.name,
+            unit: comp.unit,
+            volume: comp.volume,
             productId: req.body.id
           })
         }

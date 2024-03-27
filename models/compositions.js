@@ -6,6 +6,8 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
         name: DataTypes.STRING,
+        unit: DataTypes.STRING,
+        volume: DataTypes.STRING,
     },{
         underscored: true,
     });
