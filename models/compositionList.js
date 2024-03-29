@@ -1,11 +1,11 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const CompositionList = sequelize.define("CompositionList", {
         id:{
-            type: DataTypes.INTEGER,
+            type: Sequelize.DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING,
+        name: Sequelize.DataTypes.STRING,
     },{
         underscored: true,
     });

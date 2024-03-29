@@ -1,18 +1,18 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const ListingProducts = sequelize.define("ListingProduct", {
         id:{
-          type: DataTypes.INTEGER,
+          type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        shelfLifeStart: DataTypes.DATEONLY,
-        availableFrom: DataTypes.DATEONLY,
-        shelfLifeEnd: DataTypes.DATEONLY,
-        bidding: DataTypes.STRING,
-        price:  DataTypes.INTEGER,
-        ProductType: DataTypes.STRING,
-        name: DataTypes.STRING,
-        addressId: DataTypes.ARRAY(DataTypes.INTEGER)
+        shelfLifeStart: Sequelize.DataTypes.DATEONLY,
+        availableFrom: Sequelize.DataTypes.DATEONLY,
+        shelfLifeEnd: Sequelize.DataTypes.DATEONLY,
+        bidding: Sequelize.DataTypes.STRING,
+        price:  Sequelize.DataTypes.INTEGER,
+        ProductType: Sequelize.DataTypes.STRING,
+        name: Sequelize.DataTypes.STRING,
+        addressId: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.INTEGER)
     },{
         underscored: true,
       });

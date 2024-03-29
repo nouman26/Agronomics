@@ -1,11 +1,11 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const Bidding = sequelize.define("ProductBidding", {
         id:{
-          type: DataTypes.INTEGER,
+          type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        price: {type: DataTypes.INTEGER}
+        price: {type: Sequelize.DataTypes.INTEGER}
     },{
         underscored: true,
     });

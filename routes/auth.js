@@ -3,6 +3,7 @@ var Controller = require("../controllers/index");
 var router = express.Router();
 
 router.post("/tech/login",Controller.AuthController.techLogin);
+router.post("/register/admin",Controller.AuthController.registerAdmin);
 router.post("/password/less/login",Controller.AuthController.passwordLessLogin);
 router.post("/verify/otp",Controller.AuthController.verifyOtp);
 router.post("/update/profile", Controller.AuthController.profileUpdate);

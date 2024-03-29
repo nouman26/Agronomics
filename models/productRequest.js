@@ -1,7 +1,7 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const ProductRequest = sequelize.define("ProductRequest", {
         id:{
-          type: DataTypes.INTEGER,
+          type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },

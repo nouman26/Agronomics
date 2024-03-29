@@ -1,21 +1,21 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define('User', {
     id:{
-      type: DataTypes.INTEGER,
+      type: Sequelize.DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    name: DataTypes.STRING,
-    avatar: DataTypes.STRING,
-    role: DataTypes.STRING,
-    isSeller: {type: DataTypes.BOOLEAN,  defaultValue: false},
-    isBuyer: {type: DataTypes.BOOLEAN,  defaultValue: false},
-    phone: DataTypes.STRING,
-    status: {type: DataTypes.BOOLEAN,  defaultValue: true},
-    otp: DataTypes.INTEGER,
-    otpExpiry: DataTypes.DATE,
-    otpTries: {type: DataTypes.INTEGER,  defaultValue: 0},
-    description: {type: DataTypes.STRING}
+    name: Sequelize.DataTypes.STRING,
+    avatar: Sequelize.DataTypes.STRING,
+    role: Sequelize.DataTypes.STRING,
+    isSeller: {type: Sequelize.DataTypes.BOOLEAN,  defaultValue: false},
+    isBuyer: {type: Sequelize.DataTypes.BOOLEAN,  defaultValue: false},
+    phone: Sequelize.DataTypes.STRING,
+    status: {type: Sequelize.DataTypes.BOOLEAN,  defaultValue: true},
+    otp: Sequelize.DataTypes.INTEGER,
+    otpExpiry: Sequelize.DataTypes.DATE,
+    otpTries: {type: Sequelize.DataTypes.INTEGER,  defaultValue: 0},
+    description: {type: Sequelize.DataTypes.STRING}
   },{
     underscored: true,
   });

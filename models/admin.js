@@ -1,13 +1,13 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const Admin = sequelize.define("Admin", {
         id:{
-          type: DataTypes.INTEGER,
+          type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        name: {type: DataTypes.STRING},
-        email: {type: DataTypes.STRING},
-        password: {type: DataTypes.STRING}
+        name: {type: Sequelize.DataTypes.STRING},
+        email: {type: Sequelize.DataTypes.STRING},
+        password: {type: Sequelize.DataTypes.STRING}
     },{
         underscored: true,
     });

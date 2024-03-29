@@ -36,15 +36,9 @@ exports.techLogin = [
           const {email, password} = req.body;
           if (!email || !password) return apiResponse.validationErrorWithData(res, "Email or Password is missing");
      
-          userData = await Models.Admin.findOne({
+          let userData = await Models.Admin.findOne({
                where: { email: email.toLowerCase() },
-          });
-
-          // userData = await Models.Admin.create({
-          //      name: "Agronomics Admin",
-          //      email: "admin@agronomics.pk",
-          //      password: await bcrypt.hash("Asdf@1234", 10)
-          // });
+          })
 
           if (!userData) {
                return apiResponse.unauthorizedResponse(res, "User not found");
@@ -73,6 +67,33 @@ exports.techLogin = [
           }
      }
      catch(err){
+          console.log(err);
+          return apiResponse.ErrorResponse(res, "Something went wrong");
+     }
+}];
+
+exports.registerAdmin = [
+     async (req, res) => {
+     try{
+          if(!req.body.password){
+               return apiResponse.ErrorResponse(res, "Password is required");
+          }
+          let userData = await Models.Admin.findOne({
+               where: { email: "admin@agronomics.pk" },
+          });
+
+          if (!userData) {
+               userData = await Models.Admin.create({
+                    name: "Agronomics Admin",
+                    email: "admin@agronomics.pk",
+                    password: await bcrypt.hash(req.body.password, 10)
+               });
+               return apiResponse.successResponse("Registered Sucessfully");
+          }
+          else{
+               return apiResponse.unauthorizedResponse(res, "Admin already exist");
+          }
+     }catch(err){
           console.log(err);
           return apiResponse.ErrorResponse(res, "Something went wrong");
      }

@@ -1,13 +1,13 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const Composition = sequelize.define("Composition", {
         id:{
-            type: DataTypes.INTEGER,
+            type: Sequelize.DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING,
-        unit: DataTypes.STRING,
-        volume: DataTypes.STRING,
+        name: Sequelize.DataTypes.STRING,
+        unit: Sequelize.DataTypes.STRING,
+        volume: Sequelize.DataTypes.STRING,
     },{
         underscored: true,
     });

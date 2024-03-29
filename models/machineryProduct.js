@@ -1,21 +1,21 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const MachineryProduct = sequelize.define('MachineryProduct', {
         id:{
-          type: DataTypes.INTEGER,
+          type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        brand: DataTypes.STRING,
-        name: DataTypes.STRING,
-        horsePower: DataTypes.FLOAT,
-        model: DataTypes.STRING,
-        type: DataTypes.STRING,
-        condition: DataTypes.STRING,
-        image: DataTypes.JSON,
-        discount: DataTypes.FLOAT,
-        description: DataTypes.STRING,
-        ProductType: DataTypes.STRING,
-        isVerified: DataTypes.BOOLEAN,
+        brand: Sequelize.DataTypes.STRING,
+        name: Sequelize.DataTypes.STRING,
+        horsePower: Sequelize.DataTypes.FLOAT,
+        model: Sequelize.DataTypes.STRING,
+        type: Sequelize.DataTypes.STRING,
+        condition: Sequelize.DataTypes.STRING,
+        image: Sequelize.DataTypes.JSON,
+        discount: Sequelize.DataTypes.FLOAT,
+        description: Sequelize.DataTypes.STRING,
+        ProductType: Sequelize.DataTypes.STRING,
+        isVerified: Sequelize.DataTypes.BOOLEAN,
     },{
         underscored: true,
       });
