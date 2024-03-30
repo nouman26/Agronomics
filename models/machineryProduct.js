@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
         condition: Sequelize.DataTypes.STRING,
         image: Sequelize.DataTypes.JSON,
         discount: Sequelize.DataTypes.FLOAT,
-        description: Sequelize.DataTypes.STRING,
+        description: Sequelize.DataTypes.STRING(2000),
         ProductType: Sequelize.DataTypes.STRING,
         isVerified: Sequelize.DataTypes.BOOLEAN,
     },{

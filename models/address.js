@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize) => {
         autoIncrement: true
       },
       shop: Sequelize.DataTypes.STRING,
-      address: Sequelize.DataTypes.STRING,
+      address: Sequelize.DataTypes.STRING(2000),
       tehsil: Sequelize.DataTypes.STRING,
       city: Sequelize.DataTypes.STRING, 
       district: Sequelize.DataTypes.STRING,

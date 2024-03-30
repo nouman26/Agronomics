@@ -88,7 +88,8 @@ exports.addProduct = [
                           image: images,
                           isVerified: false,
                           seedAddedBy: req.user.id
-                      });
+                      })
+                      .catch((e) => { console.error(e.message) })
                   }
                   else if(req.body.productType == "Machinary & Tools"){
                     console.log("Machinary & Tools")
@@ -105,7 +106,8 @@ exports.addProduct = [
                           ProductType:  req.body.productType,
                           isVerified: false,
                           machineAddedBy: req.user.id
-                      });
+                      })
+                      .catch((e) => { console.error(e.message) })
                   }
                   else{
                       console.log("Common")
@@ -125,6 +127,7 @@ exports.addProduct = [
                           isVerified: false,
                           addedBy: req.user.id
                       })
+                      .catch((e) => { console.error(e.message) })
 
                       if(req.body.composition && req.body.composition.length > 0){
                         for await(let comp of req.body.composition){
@@ -172,7 +175,7 @@ exports.addProduct = [
                     owner: req.user.id,
                     addressId: (req.body.addressId) ? JSON.parse(req.body.addressId) : []
                   })
-                  // .catch((e) => { console.error(e.message) })
+                  .catch((e) => { console.error(e.message) })
                 }
                 
                 return apiResponse.successResponse(res,"Product Stored Sucessfully")
