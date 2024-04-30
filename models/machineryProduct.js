@@ -5,6 +5,12 @@ module.exports = (sequelize, Sequelize) => {
           primaryKey: true,
           autoIncrement: true
         },
+        uuid:{
+          type: Sequelize.DataTypes.UUID,
+          allowNull: false,
+          unique: true,
+          defaultValue: Sequelize.DataTypes.UUIDV4
+        },
         brand: Sequelize.DataTypes.STRING,
         name: Sequelize.DataTypes.STRING,
         horsePower: Sequelize.DataTypes.FLOAT,

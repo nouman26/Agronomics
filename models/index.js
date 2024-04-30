@@ -10,9 +10,13 @@ const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 let sequelize;
-if (config) {
+if (config.url) {
+  sequelize = new Sequelize(config.url, config);
+}
+else if (config) {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
-} else {
+} 
+else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
