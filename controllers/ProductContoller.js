@@ -65,6 +65,20 @@ exports.addProduct = [
                   }
                 }
                 
+                if(req.body.disease){
+                  if(typeof req.body.disease == "string"){
+                    try{
+                        req.body.disease = JSON.parse(req.body.disease)
+                    }
+                    catch(err){
+                      return apiResponse.ErrorResponse(res, "Please make sure to stringify disease before send")
+                    }
+                  }
+                  else{
+                    return apiResponse.ErrorResponse(res, "Please make sure to stringify disease before send")
+                  }
+                }
+
                 let product;
                 let productKey;
                 if(!req.body.isAlreadyExists){
@@ -125,6 +139,10 @@ exports.addProduct = [
                           formType: req.body.formType,
                           image: images,
                           isVerified: false,
+                          subProductType: req.body.subProductType,
+                          areaCovered: req.body.areaCovered,
+                          disease: req.body.disease,
+                          expiryDate: req.body.expiryDate,
                           addedBy: req.user.id
                       })
                       .catch((e) => { console.error(e.message) })

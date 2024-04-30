@@ -62,6 +62,20 @@ exports.addProduct = [
                     return apiResponse.ErrorResponse(res, "Please make sure to stringify composition before send")
                   }
                 }
+
+                if(req.body.disease){
+                  if(typeof req.body.disease == "string"){
+                    try{
+                        req.body.disease = JSON.parse(req.body.disease)
+                    }
+                    catch(err){
+                      return apiResponse.ErrorResponse(res, "Please make sure to stringify disease before send")
+                    }
+                  }
+                  else{
+                    return apiResponse.ErrorResponse(res, "Please make sure to stringify disease before send")
+                  }
+                }
                 
                 if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
                   console.log("Seeds")
@@ -118,6 +132,10 @@ exports.addProduct = [
                       formType: req.body.formType,
                       image: images,
                       isVerified: true,
+                      subProductType: req.body.subProductType,
+                      areaCovered: req.body.areaCovered,
+                      disease: req.body.disease,
+                      expiryDate: req.body.expiryDate,
                       addedByAdmin: req.user.id
                   })
 
@@ -133,7 +151,7 @@ exports.addProduct = [
                   }
               }
                 
-                return apiResponse.successResponse(res,"Product Stored Sucessfully")
+              return apiResponse.successResponse(res,"Product Stored Sucessfully")
             }
         })
     }
@@ -163,6 +181,20 @@ exports.updateProduct = [
             return apiResponse.ErrorResponse(res, "Please make sure to stringify composition before send")
           }
         }
+    }
+
+    if(req.body.disease){
+      if(typeof req.body.disease == "string"){
+        try{
+            req.body.disease = JSON.parse(req.body.disease)
+        }
+        catch(err){
+          return apiResponse.ErrorResponse(res, "Please make sure to stringify disease before send")
+        }
+      }
+      else{
+        return apiResponse.ErrorResponse(res, "Please make sure to stringify disease before send")
+      }
     }
 
     let product;
@@ -214,7 +246,11 @@ exports.updateProduct = [
           ProductType: req.body.productType,
           description: req.body.description,
           category: req.body.category,
-          formType: req.body.formType
+          formType: req.body.formType,
+          subProductType: req.body.subProductType,
+          areaCovered: req.body.areaCovered,
+          disease: req.body.disease,
+          expiryDate: req.body.expiryDate
       },{
         where: {id: req.body.id}
       });

@@ -5,6 +5,12 @@ module.exports = (sequelize, Sequelize) => {
           primaryKey: true,
           autoIncrement: true
         },
+        uuid:{
+          type: Sequelize.DataTypes.UUID,
+          allowNull: false,
+          unique: true,
+          defaultValue: Sequelize.DataTypes.UUIDV4
+        },
         shelfLifeStart: Sequelize.DataTypes.DATEONLY,
         availableFrom: Sequelize.DataTypes.DATEONLY,
         shelfLifeEnd: Sequelize.DataTypes.DATEONLY,
