@@ -6,6 +6,13 @@ const path = require('path');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../public/images/products")) // Destination folder for uploaded files
@@ -16,9 +23,24 @@ const storage = multer.diskStorage({
   }
 });
 
+let uploadFromBuffer = (req) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({ folder: "product" }, (err, res) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          // console.log(`Upload succeed: ${res}`);
+          resolve(res);
+        }
+      }).end(req);
+  });
+};
+
 // Multer upload limits
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage() ,
+  // storage: storage,
   // limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
   fileFilter: function (req, file, cb) {
     // Only allow images
@@ -47,7 +69,11 @@ exports.addProduct = [
             else {
                 let images = [];
                 if (req.files && req.files.length > 0) {
-                    req.files.forEach((file) => images.push(`/images/products/${file.filename}`));
+                    // req.files.forEach((file) => images.push(`/images/products/${file.filename}`));
+                    for await(let file of req.files){
+                      let image = await uploadFromBuffer(file.buffer);
+                      images.push(`/${image.public_id}.${image.format}`)
+                    }
                 }
 
                 if(req.body.composition){
@@ -317,7 +343,9 @@ exports.addProductImage = [
 
           let image;
           if (req.files && req.files.length > 0) {
-            image = `/images/products/${req.files[0].filename}`;
+            // image = `/images/products/${req.files[0].filename}`;
+              let result = await uploadFromBuffer(req.files[0].buffer);
+              image = `/${result.public_id}.${result.format}`;
           }
 
           let images = [];
@@ -396,14 +424,14 @@ exports.deleteProductImage = [
 
       let imagePath = path.join(__dirname, "../public", req.body.imageName)
 
-      await fs.unlink(imagePath, (err => {
-        if (err) console.log(err);
-        else {
-          console.log(
-            "Deleted Symbolic Link: symlinkToFile"
-          )
-        }
-      }));
+      // await fs.unlink(imagePath, (err => {
+      //   if (err) console.log(err);
+      //   else {
+      //     console.log(
+      //       "Deleted Symbolic Link: symlinkToFile"
+      //     )
+      //   }
+      // }));
 
       if(product && product.dataValues && product.dataValues.image && product.dataValues.image.length > 0){
         images = [...product.dataValues.image];

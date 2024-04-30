@@ -4,10 +4,32 @@ const randomNumber = require("../helpers/randomNumber");
 const moment = require("moment");
 const sendMessage = require("../helpers/sendMessage");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 const multer = require("multer");
 let SellerAuh = require("../middlewares/sellerAuth");
 const CommonAuth = require("../middlewares/commonAuth")
+const cloudinary = require('cloudinary').v2;
+
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+let uploadFromBuffer = (req) => {
+     return new Promise((resolve, reject) => {
+       cloudinary.uploader.upload_stream({ folder: "avatars" }, (err, res) => {
+           if (err) {
+             console.log(err);
+             reject(err);
+           } else {
+             // console.log(`Upload succeed: ${res}`);
+             resolve(res);
+           }
+         }).end(req);
+     });
+};
 
 const storage = multer.diskStorage({
      destination: (req, file, cb) => {
@@ -48,7 +70,7 @@ const storage = multer.diskStorage({
      }
  };
  
-const upload = multer({storage: storage, fileFilter: fileFilter}).single("avatar");
+const upload = multer({storage: multer.memoryStorage(), fileFilter: fileFilter}).single("avatar");
 
 exports.techLogin = [
      async (req, res) => {
@@ -511,13 +533,16 @@ exports.changeAvatar = [
                     if (!req.file) {
                          return apiResponse.ErrorResponse(res, "Image format not supported");
                     } else {
+                         let result = await uploadFromBuffer(req.file.buffer);
+                         let image = `/${result.public_id}.${result.format}`;
+
                          await Models.User.update({
-                              avatar: "/avatars/"+req.file.filename
+                              avatar: image
                          },
                          {
                               where: { id: req.user.id },
                          });
-                         return apiResponse.successResponseWithData(res,"Avatar Updated Sucessfully",  "/avatars/"+req.file.filename)
+                         return apiResponse.successResponseWithData(res,"Avatar Updated Sucessfully",  "http://res.cloudinary.com/dgemhvveu/image/upload"+image)
                  }
              });
  

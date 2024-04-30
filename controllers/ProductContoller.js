@@ -5,6 +5,14 @@ let BuyerAuh = require("../middlewares/buyersAuth");
 const multer = require('multer');
 const path = require('path');
 const { Op } = require('sequelize');
+const cloudinary = require('cloudinary').v2;
+
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -18,7 +26,8 @@ const storage = multer.diskStorage({
 
 // Multer upload limits
 const upload = multer({
-  storage: storage,
+  // storage: storage,
+  storage: multer.memoryStorage() ,
   // limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
   fileFilter: function (req, file, cb) {
     // Only allow images
@@ -30,25 +39,42 @@ const upload = multer({
   }
 }).array('images', 4);
 
+let uploadFromBuffer = (req) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({ folder: "product" }, (err, res) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          // console.log(`Upload succeed: ${res}`);
+          resolve(res);
+        }
+      }).end(req);
+  });
+};
+
 exports.addProduct = [
     SellerAuh,
     async (req, res) => {
     try{
         upload(req, res, async function (err) {
             if (err instanceof multer.MulterError) {
-              res.status(400).send('Multer error: ' + err.message);
+              return apiResponse.ErrorResponse(res,  'Multer error: ' + err.message);
             } 
             else if (err) {
-              res.status(500).send('Unknown error: ' + err.message);
+              return apiResponse.ErrorResponse(res, 'Unknown error: ' + err.message);
             } 
             else if (!req.body.productType) {
               return apiResponse.ErrorResponse(res, "Product type is required")
             } 
             else {
                 let images = [];
-                if (req.files && 
-                  req.files.length > 0) {
-                    req.files.forEach((file) => images.push(`/images/products/${file.filename}`));
+                if (req.files && req.files.length > 0) {
+                    // req.files.forEach((file) => images.push(`/images/products/${file.filename}`));
+                    for await(let file of req.files){
+                      let image = await uploadFromBuffer(file.buffer);
+                      images.push(`/${image.public_id}.${image.format}`)
+                    }
                 }
 
                 if(req.body.composition){

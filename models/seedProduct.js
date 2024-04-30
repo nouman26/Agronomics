@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Seeds = sequelize.define('SeedProducts', {
+    const SeedProducts = sequelize.define('SeedProducts', {
         id:{
           type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
@@ -30,6 +30,6 @@ module.exports = (sequelize, Sequelize) => {
         underscored: true,
       });
   
-    return Seeds;
+    return SeedProducts;
   };
   
