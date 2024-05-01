@@ -72,6 +72,27 @@ const storage = multer.diskStorage({
  
 const upload = multer({storage: multer.memoryStorage(), fileFilter: fileFilter}).single("avatar");
 
+// Register Admin if not exist
+// (async function (){
+//      try{
+//           console.log("Run")
+//           let userData = await Models.Admin.findOne({
+//                where: { email: "admin@agronomics.pk" },
+//           });
+
+//           if (!userData) {
+//                userData = await Models.Admin.create({
+//                     name: "Agronomics Admin",
+//                     email: "admin@agronomics.pk",
+//                     password: await bcrypt.hash("admin@ummaya", 10)
+//                });
+//                console.log("Registered Sucessfully");
+//           }
+//      }catch(err){
+//           console.log(err);
+//      }
+// })();
+
 exports.techLogin = [
      async (req, res) => {
      try{

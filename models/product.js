@@ -25,7 +25,6 @@ module.exports = (sequelize, Sequelize) => {
         isVerified: Sequelize.DataTypes.BOOLEAN,
         image: Sequelize.DataTypes.JSON,
         areaCovered: Sequelize.DataTypes.FLOAT,
-        expiryDate: Sequelize.DataTypes.DATEONLY,
         disease: Sequelize.DataTypes.JSON
     },{
         underscored: true,

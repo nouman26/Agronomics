@@ -168,7 +168,6 @@ exports.addProduct = [
                           subProductType: req.body.subProductType,
                           areaCovered: req.body.areaCovered,
                           disease: req.body.disease,
-                          expiryDate: req.body.expiryDate,
                           addedBy: req.user.id
                       })
                       .catch((e) => { console.error(e.message) })
@@ -217,6 +216,7 @@ exports.addProduct = [
                     price:  req.body.price,
                     ProductType:  req.body.productType,
                     owner: req.user.id,
+                    expiryDate: req.body.expiryDate,
                     addressId: (req.body.addressId) ? JSON.parse(req.body.addressId) : []
                   })
                   .catch((e) => { console.error(e.message) })

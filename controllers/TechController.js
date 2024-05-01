@@ -162,7 +162,6 @@ exports.addProduct = [
                       subProductType: req.body.subProductType,
                       areaCovered: req.body.areaCovered,
                       disease: req.body.disease,
-                      expiryDate: req.body.expiryDate,
                       addedByAdmin: req.user.id
                   })
 
@@ -276,8 +275,7 @@ exports.updateProduct = [
           formType: req.body.formType,
           subProductType: req.body.subProductType,
           areaCovered: req.body.areaCovered,
-          disease: req.body.disease,
-          expiryDate: req.body.expiryDate
+          disease: req.body.disease
       },{
         where: {id: req.body.id}
       });
