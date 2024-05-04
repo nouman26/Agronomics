@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
         weightUnit: Sequelize.DataTypes.STRING,
         pkgWeight: Sequelize.DataTypes.FLOAT,
         pkgQuantity: Sequelize.DataTypes.INTEGER,
-        description: Sequelize.DataTypes.STRING(2000),
+        description: Sequelize.DataTypes.STRING(6000),
         ProductType: Sequelize.DataTypes.STRING,
         image: Sequelize.DataTypes.JSON,
         isVerified: Sequelize.DataTypes.BOOLEAN

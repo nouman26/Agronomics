@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         brand: Sequelize.DataTypes.STRING,
         name: Sequelize.DataTypes.STRING,
-        description:  Sequelize.DataTypes.STRING(2000),
+        description:  Sequelize.DataTypes.STRING(6000),
         pkgType:  Sequelize.DataTypes.STRING,
         weightUnit: Sequelize.DataTypes.STRING,
         pkgWeight:  Sequelize.DataTypes.STRING,
