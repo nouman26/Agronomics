@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
         formType: Sequelize.DataTypes.STRING,
         isVerified: Sequelize.DataTypes.BOOLEAN,
         image: Sequelize.DataTypes.JSON,
-        areaCovered: Sequelize.DataTypes.FLOAT,
+        areaCovered: Sequelize.DataTypes.STRING,
         disease: Sequelize.DataTypes.JSON
     },{
         underscored: true,

@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
+const { Op } = require('sequelize');
 
 // Cloudinary configuration
 cloudinary.config({
@@ -667,6 +668,14 @@ exports.getProductsWRToType = [
       filter.isVerified = false;
     }
 
+    if(req.body.query){
+      filter.name ={[Op.iLike]: `%${req.body.query}%`}
+    }
+
+    if(req.body.brand){
+      filter.brand ={[Op.iLike]: `%${req.body.brand}%`}
+    }
+
     if(req.body.productType){
       if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
         products = await Models.SeedProducts.findAll({
@@ -692,6 +701,12 @@ exports.getProductsWRToType = [
       }
       else {
         filter.ProductType = req.body.productType;
+        if(req.body.subCategory){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+        }
+        if(req.body.subProductType){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+        }
         products = await Models.Product.findAll({
           where: filter,
           order: [['createdAt', 'DESC']],
@@ -734,6 +749,13 @@ exports.getProductsWRToType = [
         filter.ProductType = req.body.productType;
       }
 
+      if(req.body.subCategory){
+        filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+      }
+      if(req.body.subProductType){
+        filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+      }
+
       const common = await Models.Product.findAll({
         where: filter,
         order: [['createdAt', 'DESC']],
@@ -754,6 +776,22 @@ exports.getProductsWRToType = [
       if(common) products.push(...common)
       if(seeds) products.push(...seeds)
       if(machinary) products.push(...machinary)
+    }
+
+    let finalProducts = [];
+    if(req.body.composition && req.body.composition.length > 0){
+      for await(let product of products){
+        if(product.composition && product.composition.length == req.body.composition.length){
+          let count = 0;
+          req.body.composition.forEach(c => {
+            let exist = product.composition.find(x => x.name.toLowerCase() == c.name.toLowerCase() && x.unit.toLowerCase() == c.unit.toLowerCase() && parseFloat(x.volume) == parseFloat(c.volume));
+            if(exist) count = count + 1;
+          })
+          if(count == product.composition.length){
+            finalProducts.push(product);
+          }
+        }
+      }
     }
     return apiResponse.successResponseWithData(res, "Products Fetched Sucessfully", products);
   }

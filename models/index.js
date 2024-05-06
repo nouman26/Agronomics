@@ -1,16 +1,38 @@
 'use strict';
 
 const Sequelize = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+let config = require(__dirname + '/../config/config.json')[env];
 const db = {};
+
+config = {
+  user: "avnadmin",
+  password: process.env.DB_PASSWORD,
+  host: "pg-ea8c835-nouman-3c44.k.aivencloud.com",
+  port: 19574,
+  database: "defaultdb",
+  ssl: {
+      rejectUnauthorized: true,
+      ca: process.env.CA,
+  },
+};
 
 let sequelize;
 if (config.url) {
   sequelize = new Sequelize(config.url, config);
 }
 else if (config) {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(config.database, config.user, config.password, {
+    host: config.host,
+    port: config.port,
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: config.ssl
+    }
+  });
 } 
 else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);

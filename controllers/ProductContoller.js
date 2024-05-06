@@ -608,10 +608,15 @@ exports.search = [
     async (req, res) => {
     try {
       let filter =  {
-          name: {
-            [Op.iLike]: `%${req.body.query}%` // Case-insensitive search
-          },
-          isVerified: true
+        isVerified: true
+      }
+
+      if(req.body.query){
+        filter.name ={[Op.iLike]: `%${req.body.query}%`}
+      }
+
+      if(req.body.brand){
+        filter.brand ={[Op.iLike]: `%${req.body.brand}%`}
       }
       
       let products;
@@ -634,6 +639,12 @@ exports.search = [
         }
         else {
           filter.ProductType = req.body.productType;
+          if(req.body.subCategory){
+            filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+          }
+          if(req.body.subProductType){
+            filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+          }
           products = await Models.Product.findAll({
             where: filter,
             order: [['createdAt', 'DESC']],
@@ -661,6 +672,12 @@ exports.search = [
         if(req.body.category){
           filter.ProductType = req.body.category;
         }
+        if(req.body.subCategory){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+        }
+        if(req.body.subProductType){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+        }
   
         const common = await Models.Product.findAll({
           where: filter,
@@ -676,7 +693,22 @@ exports.search = [
         if(seeds) products.push(...seeds)
         if(machinary) products.push(...machinary)
       }
-      return apiResponse.successResponseWithData(res, "Search Result", products)
+      let finalProducts = [];
+      if(req.body.composition && req.body.composition.length > 0){
+        for await(let product of products){
+          if(product.composition && product.composition.length == req.body.composition.length){
+            let count = 0;
+            req.body.composition.forEach(c => {
+              let exist = product.composition.find(x => x.name.toLowerCase() == c.name.toLowerCase() && x.unit.toLowerCase() == c.unit.toLowerCase() && parseFloat(x.volume) == parseFloat(c.volume));
+              if(exist) count = count + 1;
+            })
+            if(count == product.composition.length){
+              finalProducts.push(product);
+            }
+          }
+        }
+      }
+      return apiResponse.successResponseWithData(res, "Search Result", finalProducts)
   } catch (err) {
     console.error(err);
     return apiResponse.ErrorResponse(res, "Something went wrong")
