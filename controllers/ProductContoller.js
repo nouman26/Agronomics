@@ -696,17 +696,18 @@ exports.search = [
       let finalProducts = [];
       if(req.body.composition && req.body.composition.length > 0){
         for await(let product of products){
-          if(product.composition && product.composition.length == req.body.composition.length){
-            let count = 0;
-            req.body.composition.forEach(c => {
-              let exist = product.composition.find(x => x.name.toLowerCase() == c.name.toLowerCase() && x.unit.toLowerCase() == c.unit.toLowerCase() && parseFloat(x.volume) == parseFloat(c.volume));
-              if(exist) count = count + 1;
-            })
-            if(count == product.composition.length){
-              finalProducts.push(product);
-            }
+          let count = 0;
+          req.body.composition.forEach(c => {
+            let exist = product.composition.find(x => x.name.toLowerCase() == c.name.toLowerCase() && x.unit.toLowerCase() == c.unit.toLowerCase() && parseFloat(x.volume) == parseFloat(c.volume));
+            if(exist) count = count + 1;
+          })
+          if(count == req.body.composition.length){
+            finalProducts.push(product);
           }
         }
+      }
+      else{
+        finalProducts = products;
       }
       return apiResponse.successResponseWithData(res, "Search Result", finalProducts)
   } catch (err) {
