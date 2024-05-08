@@ -17,7 +17,6 @@ module.exports = (sequelize, Sequelize) => {
         bidding: Sequelize.DataTypes.STRING,
         price:  Sequelize.DataTypes.INTEGER,
         ProductType: Sequelize.DataTypes.STRING,
-        name: Sequelize.DataTypes.STRING,
         addressId: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.INTEGER),
         expiryDate: Sequelize.DataTypes.DATEONLY
     },{

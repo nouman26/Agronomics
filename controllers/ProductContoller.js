@@ -258,32 +258,58 @@ exports.deleteProduct = [
   }
 }]
 
-exports.getProductLisingsWRTType = [
+exports.filterProductLisings = [
     async (req, res) => {
     try{
-      // const { limit = 20, skip = 0 } = req.query;
-      if (!req.body.productType) {
-        return apiResponse.ErrorResponse(res, "Product type is required")
-      } 
+      let filter =  {
+        isVerified: true
+      }
+  
+      if(req.body.query){
+        filter.name ={[Op.iLike]: `%${req.body.query}%`}
+      }
+  
+      if(req.body.brand){
+        filter.brand ={[Op.iLike]: `%${req.body.brand}%`}
+      }
+
+      if((req.body.subCategory || req.body.subProductType) && req.body.productType !== "Machinary & Tools" && req.body.productType !== "Seed" && req.body.productType !== "Seed Varieties"){
+        if(req.body.subCategory){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+        }
+        if(req.body.subProductType){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+        }
+      }
+
+
 
       let allProducts = await Models.ListingProduct.findAll({
-        where: { ProductType:req.body.productType},
+        where:  (req.body.productType) ? {ProductType:req.body.productType}: {},
         include: [
           {
             model: Models.Product,
-            as: "product"
+            as: "product",
+            where: filter,
+            required: false,
+            include: {
+              model: Models.Composition,
+              as: "composition", // Use the default alias assigned by Sequelize
+            },
           },
           {
             model: Models.MachineryProduct,
-            as: "machineryProduct"
+            as: "machineryProduct",
+            where: filter,
+            required: false
           }, 
           {
             model: Models.SeedProducts,
-            as: "seedProducts"
+            as: "seedProducts",
+            where: filter,
+            required: false
           }  
         ],
-        // limit: parseInt(limit),
-        // offset: parseInt(skip),
         order: [['createdAt', 'DESC']]
       });
 
@@ -315,11 +341,23 @@ exports.getProductLisingsWRTType = [
           delete x.machineryProduct;
           delete x.seedProducts;
 
-          listingProducts.push({...x, ...temp})
+          let temp2 = {...x, ...temp};
+
+          if(temp2 && temp2.composition && temp2.composition.length && req.body.composition && req.body.composition.length > 0){
+            let count = 0;
+            req.body.composition.forEach(c => {
+              let exist = temp2.composition.find(x => x.name.toLowerCase() == c.name.toLowerCase() && x.unit.toLowerCase() == c.unit.toLowerCase() && parseFloat(x.volume) == parseFloat(c.volume));
+              if(exist) count = count + 1;
+            })
+            if(count == req.body.composition.length){
+              listingProducts.push(temp2);
+            }
+          }
+          else{
+            listingProducts.push(temp2)
+          }
         }
       })
-
-
       return apiResponse.successResponseWithData(res, "data", listingProducts)
     }catch(err){
       console.log(err)
