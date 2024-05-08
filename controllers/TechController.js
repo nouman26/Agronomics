@@ -676,6 +676,10 @@ exports.getProductsWRToType = [
       filter.brand ={[Op.iLike]: `%${req.body.brand}%`}
     }
 
+    if(req.body.category){
+      req.body.productType = req.body.category;
+    }
+
     if(req.body.productType){
       if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
         products = await Models.SeedProducts.findAll({

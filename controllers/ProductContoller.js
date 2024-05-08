@@ -282,6 +282,9 @@ exports.filterProductLisings = [
         }
       }
 
+      if(req.body.category){
+        req.body.productType = req.body.category;
+      }
 
 
       let allProducts = await Models.ListingProduct.findAll({
