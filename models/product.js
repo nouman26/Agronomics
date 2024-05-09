@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Products = sequelize.define("Product", {
+    const Product = sequelize.define("Product", {
         id:{
           type: Sequelize.DataTypes.INTEGER,
           primaryKey: true,
@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         brand: Sequelize.DataTypes.STRING,
         name: Sequelize.DataTypes.STRING,
-        description:  Sequelize.DataTypes.STRING(2000),
+        description:  Sequelize.DataTypes.STRING(6000),
         pkgType:  Sequelize.DataTypes.STRING,
         weightUnit: Sequelize.DataTypes.STRING,
         pkgWeight:  Sequelize.DataTypes.STRING,
@@ -24,13 +24,12 @@ module.exports = (sequelize, Sequelize) => {
         formType: Sequelize.DataTypes.STRING,
         isVerified: Sequelize.DataTypes.BOOLEAN,
         image: Sequelize.DataTypes.JSON,
-        areaCovered: Sequelize.DataTypes.FLOAT,
-        expiryDate: Sequelize.DataTypes.DATEONLY,
+        areaCovered: Sequelize.DataTypes.STRING,
         disease: Sequelize.DataTypes.JSON
     },{
         underscored: true,
       });
   
-    return Products;
+    return Product;
   };
   

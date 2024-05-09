@@ -1,4 +1,3 @@
-const { FORCE } = require("sequelize/lib/index-hints");
 const db = require("../models/index");
 
 const connectDB = async () => {

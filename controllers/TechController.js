@@ -135,7 +135,6 @@ exports.addProduct = [
                       subProductType: req.body.subProductType,
                       areaCovered: req.body.areaCovered,
                       disease: req.body.disease,
-                      expiryDate: req.body.expiryDate,
                       addedByAdmin: req.user.id
                   })
 
@@ -249,8 +248,7 @@ exports.updateProduct = [
           formType: req.body.formType,
           subProductType: req.body.subProductType,
           areaCovered: req.body.areaCovered,
-          disease: req.body.disease,
-          expiryDate: req.body.expiryDate
+          disease: req.body.disease
       },{
         where: {id: req.body.id}
       });
@@ -640,6 +638,18 @@ exports.getProductsWRToType = [
       filter.isVerified = false;
     }
 
+    if(req.body.query){
+      filter.name ={[Op.iLike]: `%${req.body.query}%`}
+    }
+
+    if(req.body.brand){
+      filter.brand ={[Op.iLike]: `%${req.body.brand}%`}
+    }
+
+    if(req.body.category){
+      req.body.productType = req.body.category;
+    }
+
     if(req.body.productType){
       if(req.body.productType == "Seed" || req.body.productType == "Seed Varieties"){
         products = await Models.SeedProducts.findAll({
@@ -665,6 +675,12 @@ exports.getProductsWRToType = [
       }
       else {
         filter.ProductType = req.body.productType;
+        if(req.body.subCategory){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+        }
+        if(req.body.subProductType){
+          filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+        }
         products = await Models.Product.findAll({
           where: filter,
           order: [['createdAt', 'DESC']],
@@ -707,6 +723,13 @@ exports.getProductsWRToType = [
         filter.ProductType = req.body.productType;
       }
 
+      if(req.body.subCategory){
+        filter.subProductType ={[Op.iLike]: `%${req.body.subCategory}%`}
+      }
+      if(req.body.subProductType){
+        filter.subProductType ={[Op.iLike]: `%${req.body.subProductType}%`}
+      }
+
       const common = await Models.Product.findAll({
         where: filter,
         order: [['createdAt', 'DESC']],
@@ -728,7 +751,24 @@ exports.getProductsWRToType = [
       if(seeds) products.push(...seeds)
       if(machinary) products.push(...machinary)
     }
-    return apiResponse.successResponseWithData(res, "Products Fetched Sucessfully", products);
+
+    let finalProducts = [];
+    if(req.body.composition && req.body.composition.length > 0){
+      for await(let product of products){
+        let count = 0;
+        req.body.composition.forEach(c => {
+          let exist = product.composition.find(x => x.name.toLowerCase() == c.name.toLowerCase() && x.unit.toLowerCase() == c.unit.toLowerCase() && parseFloat(x.volume) == parseFloat(c.volume));
+          if(exist) count = count + 1;
+        })
+        if(count == req.body.composition.length){
+          finalProducts.push(product);
+        }
+      }
+    }
+    else{
+      finalProducts = products;
+    }
+    return apiResponse.successResponseWithData(res, "Products Fetched Sucessfully", finalProducts);
   }
   catch(err){
     console.log(err);

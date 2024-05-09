@@ -1,10 +1,6 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const Sequelize = require('sequelize');
-// const process = require('process');
-const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
@@ -20,20 +16,18 @@ else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize);
-    db[model.name] = model;
-  });
+db["Address"] = require("./address")(sequelize, Sequelize);
+db["Admin"] = require("./admin")(sequelize, Sequelize);
+db["CompositionList"] = require("./compositionList")(sequelize, Sequelize);
+db["Composition"] = require("./compositions")(sequelize, Sequelize);
+db["ListingProduct"] = require("./listingProduct")(sequelize, Sequelize);
+db["MachineryProduct"] = require("./machineryProduct")(sequelize, Sequelize);
+db["Product"] = require("./product")(sequelize, Sequelize);
+db["ProductBidding"] = require("./productBidding")(sequelize, Sequelize);
+db["ProductRequest"] = require("./productRequest")(sequelize, Sequelize);
+db["SeedProducts"] = require("./seedProduct")(sequelize, Sequelize);
+db["User"] = require("./user")(sequelize, Sequelize);
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
